@@ -5,7 +5,6 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import android.util.Log
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
@@ -20,8 +19,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class Bucket {
-    var requestQueue : RequestQueue = Volley.newRequestQueue(Bucket.appContext)
     companion object {
+        var requestQueue : RequestQueue = Volley.newRequestQueue(Bucket.appContext)
         @SuppressLint("SimpleDateFormat") @JvmStatic val df : DateFormat = SimpleDateFormat("yyyyMMdd")
         @JvmStatic var appContext : Context? = null
         @JvmStatic var environment : Bucket.DeploymentEnvironment = Bucket.DeploymentEnvironment.Development
@@ -35,6 +34,7 @@ class Bucket {
             filteredDenoms.forEach { denomination ->
                 bucketAmount = (bucketAmount % denomination)
             }
+
             return bucketAmount
         }
     }
@@ -60,15 +60,11 @@ class Bucket {
 
                 val url = Bucket.environment.retailerLogin().build().toString()
 
-                val request = JsonObjectRequest(Request.Method.POST, url, json, Response.Listener { _ ->
+                return JsonObjectRequest(Request.Method.POST, url, json, Response.Listener { _ ->
                     callback.let { callback!!.didLogIn() }
                 }, Response.ErrorListener { error ->
                     callback.let { callback!!.didError(error) }
                 })
-
-                // Return the request to add in the queue
-                return request
-
             }
         }
     }
@@ -86,9 +82,7 @@ class Bucket {
         // Primary key (for bucket)
         var bucketTransactionId : String? = null
 
-
         init {
-
             this.intervalId = ""
             this.locationId = "Ryan's Temporary Location"
             this.terminalId = Build.SERIAL
@@ -111,7 +105,7 @@ class Bucket {
 
             // We will always set the amount when sending the JSON:
             obj.put("amount", amount)
-            intervalId = Date().now
+            intervalId = Date().toYYYYMMDD
             locationId.let { obj.put("locationId", it) }
             clientTransactionId.let { obj.put("clientTransactionId", it) }
             terminalId.let { obj.put("terminalId", it) }
@@ -121,13 +115,15 @@ class Bucket {
             return obj
         }
 
-        fun create(callback: Bucket.Callbacks.CreateTransaction?): JsonObjectRequest? {
+        fun create(callback: Bucket.Callbacks.CreateTransaction?) {
 
+            // Get the client id & client secret for this retailer:
             val clientId = Bucket.Credentials.clientId()
             val clientSecret = Bucket.Credentials.clientSecret()
+
             if (clientId == null || clientSecret == null) {
+
                 callback.let { it!!.didError(VolleyError("You need a client id & a client secret to create a transaction.")) }
-                return null
             }
 
             val urlBuilder = Bucket.environment.transaction()
@@ -141,7 +137,7 @@ class Bucket {
             // Get the request body JSON:
             val httpBody = this.toJSON()
 
-            Log.d("CREATE TRANS", url)
+
             // Okay we need to go & create the request & send the information to Marco:
             val request = JsonObjectRequest(Request.Method.POST, url, httpBody, Response.Listener<JSONObject> { response ->
                 // Deal with the response object:
@@ -152,7 +148,7 @@ class Bucket {
                 callback.let { it!!.didError(error) }
             })
 
-            return request
+            Bucket.requestQueue.add(request)
 
         }
 
@@ -235,6 +231,6 @@ class Bucket {
     }
 }
 
-var Date.now : String
+var Date.toYYYYMMDD : String
     get() { return Bucket.df.format(this) }
     set(value) {  }
