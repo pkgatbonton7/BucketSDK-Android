@@ -1,7 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android'
-apply plugin: 'maven-publish'
 
 android {
     compileSdkVersion 'android-25'
@@ -19,14 +18,10 @@ android {
     }
 }
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId 'com.bucket.bucketsdk'
-            artifactId 'bucketsdk'
-            version '1.0'
-        }
-    }
+ext {
+    PUBLISH_GROUP_ID    = 'com.bucket.bucketsdk'
+    PUBLISH_ARTIFACT_ID = 'BucketSDK-Android'
+    PUBLISH_VERSION     = '1.0'
 }
 
 dependencies {
@@ -42,3 +37,5 @@ dependencies {
 repositories {
     mavenCentral()
 }
+
+apply from: 'https://raw.githubusercontent.com/blundell/release-android-library/master/android-release-aar.gradle'
