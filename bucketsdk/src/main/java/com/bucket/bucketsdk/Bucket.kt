@@ -108,15 +108,15 @@ class Bucket {
         var terminalId                      : String = Build.SERIAL
 
         private fun updateWith(json: JSONObject) {
-            this.clientTransactionId = json.getString("clientTransactionId")
+
             this.customerCode = json.getString("customerCode")
             this.bucketTransactionId = json.getString("bucketTransactionId")
-
-            // Now take care of the qrCode contents:
-            val qrCodeContent = json.getString("qrCodeContent")
-            if (!qrCodeContent.isNil) {
-                this.qrCodeContent = URL(qrCodeContent)
-            }
+            this.qrCodeContent = json.get("qrCodeContent") as URL
+//            // Now take care of the qrCode contents:
+//            val qrCodeContent = json.getString("qrCodeContent")
+//            if (!qrCodeContent.isNil) {
+//                this.qrCodeContent = URL(qrCodeContent)
+//            }
 
         }
 
