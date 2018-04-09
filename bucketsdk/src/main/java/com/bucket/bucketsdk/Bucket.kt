@@ -132,9 +132,9 @@ class Bucket {
             obj.put("intervalId", intervalId)
             obj.put("terminalId", terminalId)
 
-            locationId.let { obj.put("locationId", it!!) }
-            customerCode.let { obj.put("customerCode", it!!) }
-            qrCodeContent.let { obj.put("qrCodeContent", it!!) }
+            if (!locationId.isNil) { obj.put("locationId", locationId!!) }
+            if (!customerCode.isNil) { obj.put("customerCode", customerCode!!) }
+            if (!qrCodeContent.isNil) { obj.put("qrCodeContent", qrCodeContent!!) }
 
             return obj
         }
