@@ -1,10 +1,6 @@
 # BucketSDK-Android
 This is the BucketSDK for Android.  Here is where you can create transactions & other important features of the Bucket API pre-wrapped for Android.
 
-## Example
-
-To run the example project, clone the repo, and run `pod install` from the Example directory first.
-
 ## Requirements
 You will need to be registered with Bucket & have obtained a Retailer Account.  You will need to have received a clientId & clientSecret in order to access Bucket's API.
 
