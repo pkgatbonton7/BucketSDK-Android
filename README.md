@@ -15,8 +15,6 @@ implementation 'com.github.buckettech:BucketSDK-Android:1.0.3'
 
 ## Usage
 Using the BucketSDK, you will be able to use either Java or Kotlin to access the functions that you will need.
-
-## Usage
 ### Setting the app context & app environment
 ```
 // Java:
