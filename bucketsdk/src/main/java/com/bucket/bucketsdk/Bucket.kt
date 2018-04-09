@@ -111,7 +111,8 @@ class Bucket {
 
             this.customerCode = json.getString("customerCode")
             this.bucketTransactionId = json.getString("bucketTransactionId")
-            this.qrCodeContent = json.get("qrCodeContent") as URL
+            this.qrCodeContent = json.getURL("qrCodeContent")
+
 //            // Now take care of the qrCode contents:
 //            val qrCodeContent = json.getString("qrCodeContent")
 //            if (!qrCodeContent.isNil) {
@@ -255,6 +256,12 @@ class Bucket {
             return this.retailerBaseUri().appendPath("login")
         }
     }
+}
+
+private fun JSONObject?.getURL(name : String): URL? {
+    if (this.isNil) return null
+    val stringVal = this!!.getString(name)
+    return URL(stringVal)
 }
 
 annotation class PrimaryKey
