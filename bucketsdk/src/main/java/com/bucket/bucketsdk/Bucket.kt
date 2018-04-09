@@ -74,7 +74,6 @@ class Bucket {
                     val clientId = responseJSON.getString("client_id")
                     val clientSecret = responseJSON.getString("client_secret")
 
-                    // TODO:  We need to go & test to make sure this works once we have the retailer login endpoint.
                     if (clientId.isNullOrEmpty() || clientSecret.isNullOrEmpty()) return@Listener
 
                     // Now go & set the values securely:
@@ -112,12 +111,6 @@ class Bucket {
             this.customerCode = json.getString("customerCode")
             this.bucketTransactionId = json.getString("bucketTransactionId")
             this.qrCodeContent = json.getURL("qrCodeContent")
-
-//            // Now take care of the qrCode contents:
-//            val qrCodeContent = json.getString("qrCodeContent")
-//            if (!qrCodeContent.isNil) {
-//                this.qrCodeContent = URL(qrCodeContent)
-//            }
 
         }
 
