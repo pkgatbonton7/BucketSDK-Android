@@ -170,8 +170,11 @@ class Bucket {
                 callback?.didError(error.bucketError)
 
             })
-            request.headers.set("Content-Type", "application/json; charset=UTF-8")
+
+            request.headers["Content-Type"] = "application/json; charset=UTF-8"
             Bucket.requestQueue?.add(request)
+
+
 
         }
 
