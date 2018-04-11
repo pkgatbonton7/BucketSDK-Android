@@ -1,4 +1,4 @@
-package com.bucket.bucketsdk
+package bucket.bucketsdk
 
 import android.annotation.SuppressLint
 import android.content.Context

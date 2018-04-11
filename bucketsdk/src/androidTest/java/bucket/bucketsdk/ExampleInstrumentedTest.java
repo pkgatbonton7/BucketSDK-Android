@@ -1,4 +1,4 @@
-package com.bucket.bucketsdk;
+package bucket.bucketsdk;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
