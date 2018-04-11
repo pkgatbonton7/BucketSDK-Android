@@ -14,6 +14,7 @@ import com.android.volley.toolbox.Volley
 import de.adorsys.android.securestoragelibrary.SecurePreferences
 import org.json.JSONObject
 import java.net.URL
+import java.net.URLEncoder
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -104,7 +105,7 @@ class Bucket {
         var intervalId                      : String? = null
 
         var locationId                      : String? = null
-        var terminalId                      : String = Build.SERIAL
+        var terminalId                      : String? = Build.SERIAL
 
         private fun updateWith(json: JSONObject) {
 
@@ -147,17 +148,12 @@ class Bucket {
 
             if (shouldIReturn) return
 
-            val urlBuilder = Bucket.environment.transaction()
-
-            // Modify the URL String for this request:
-            urlBuilder.appendPath(clientId)
-            urlBuilder.appendQueryParameter("code", clientSecret)
+            val urlBuilder = Bucket.environment.transaction(clientId!!, clientSecret!!)
 
             val url = urlBuilder.build().toString()
 
             // Get the request body JSON:
             val httpBody = this.toJSON()
-
 
             // Okay we need to go & create the request & send the information to Marco:
             val request = JsonObjectRequest(Request.Method.POST, url, httpBody, Response.Listener { response ->
@@ -241,8 +237,8 @@ class Bucket {
         }
 
         // PRE-BUILT ENDPOINT PATHS:
-        fun transaction(): Uri.Builder {
-            return this.bucketBaseUri().appendPath("transaction")
+        fun transaction(clientId: String, clientSecret: String): Uri.Builder {
+            return this.bucketBaseUri().appendPath("transaction").appendPath(clientId).appendQueryParameter("code", clientSecret)
         }
 
         fun retailerLogin(): Uri.Builder {

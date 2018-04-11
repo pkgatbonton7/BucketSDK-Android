@@ -1,6 +1,7 @@
 package bucket.sdk;
 
 import android.content.Context;
+import android.net.Uri;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -23,4 +24,5 @@ public class ExampleInstrumentedTest {
 
         assertEquals("bucket.sdk", appContext.getPackageName());
     }
+
 }
