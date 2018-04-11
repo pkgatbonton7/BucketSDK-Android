@@ -14,10 +14,12 @@ import com.android.volley.toolbox.Volley
 import de.adorsys.android.securestoragelibrary.SecurePreferences
 import org.json.JSONObject
 import java.net.URL
-import java.net.URLEncoder
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import com.android.volley.AuthFailureError
+import kotlin.collections.HashMap
+
 
 class Bucket {
     companion object {
@@ -90,8 +92,6 @@ class Bucket {
                     callback?.didError(error.bucketError)
                 })
 
-                request.headers.set("Content-Type", "application/json; charset=UTF-8")
-
                 Bucket.requestQueue?.add(request)
 
             }
@@ -160,7 +160,7 @@ class Bucket {
             val httpBody = this.toJSON()
 
             // Okay we need to go & create the request & send the information to Marco:
-            val request = JsonObjectRequest(Request.Method.POST, url, httpBody, Response.Listener { response ->
+            val request = object : JsonObjectRequest(Request.Method.POST, url, httpBody, Response.Listener { response ->
                 // Deal with the response object:
                 this.updateWith(response)
                 callback?.transactionCreated()
@@ -169,12 +169,16 @@ class Bucket {
                 // Tell the listener that we had an error:
                 callback?.didError(error.bucketError)
 
-            })
+            }) {
+                @Throws(AuthFailureError::class)
+                override fun getHeaders(): Map<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Content-Type"] = "application/json; charset=UTF-8"
+                    return headers
+                }
+            }
 
-            request.headers["Content-Type"] = "application/json; charset=UTF-8"
             Bucket.requestQueue?.add(request)
-
-
 
         }
 
