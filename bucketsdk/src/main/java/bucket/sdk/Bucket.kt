@@ -90,6 +90,8 @@ class Bucket {
                     callback?.didError(error.bucketError)
                 })
 
+                request.headers.set("Content-Type", "application/json; charset=UTF-8")
+
                 Bucket.requestQueue?.add(request)
 
             }
@@ -164,12 +166,11 @@ class Bucket {
                 callback?.transactionCreated()
 
             }, Response.ErrorListener { error ->
-
                 // Tell the listener that we had an error:
                 callback?.didError(error.bucketError)
 
             })
-
+            request.headers.set("Content-Type", "application/json; charset=UTF-8")
             Bucket.requestQueue?.add(request)
 
         }
