@@ -1,4 +1,4 @@
-package bucket.bucketsdk;
+package bucket.sdk;
 
 import org.junit.Test;
 
