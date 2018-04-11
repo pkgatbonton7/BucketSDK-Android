@@ -52,13 +52,15 @@ class Bucket {
     class Callbacks {
         abstract class RetailerLogin {
             abstract fun didLogIn()
-            abstract fun didError(error: VolleyError?)
+            abstract fun didError(error: Bucket.Error?)
         }
         abstract class CreateTransaction {
             abstract fun transactionCreated()
-            abstract fun didError(error: VolleyError?)
+            abstract fun didError(error: Bucket.Error?)
         }
     }
+
+    class Error(var message: String?, var code : Int?)
 
     class Retailer {
         companion object {
@@ -85,7 +87,7 @@ class Bucket {
                     callback?.didLogIn()
 
                 }, Response.ErrorListener { error ->
-                    callback?.didError(error)
+                    callback?.didError(error.bucketError)
                 })
 
                 Bucket.requestQueue?.add(request)
@@ -143,7 +145,7 @@ class Bucket {
             var shouldIReturn = false
             if (clientId.isNullOrEmpty() || clientSecret.isNullOrEmpty()) {
                 shouldIReturn = true
-                callback?.didError(VolleyError("You need a client id & a client secret to create a transaction."))
+                callback?.didError(Bucket.Error("You must have a client id & client secret.",null))
             }
 
             if (shouldIReturn) return
@@ -164,7 +166,7 @@ class Bucket {
             }, Response.ErrorListener { error ->
 
                 // Tell the listener that we had an error:
-                callback?.didError(error)
+                callback?.didError(error.bucketError)
 
             })
 
@@ -260,4 +262,13 @@ var Any?.isNil : Boolean
 
 var Date.toYYYYMMDD : String
     get() { return Bucket.df.format(this) }
+    set(value) {  }
+
+var VolleyError?.bucketError : Bucket.Error?
+    get() {
+        if (this.isNil) return null
+        val code = this!!.networkResponse.statusCode
+        val json = JSONObject(String(this.networkResponse.data))
+        return Bucket.Error(json.getString("message"), code)
+    }
     set(value) {  }
