@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("bucket.bucketsdk", appContext.getPackageName());
+        assertEquals("bucket.sdk", appContext.getPackageName());
     }
 }
