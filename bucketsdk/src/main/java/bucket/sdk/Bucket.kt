@@ -163,6 +163,7 @@ class Bucket {
                     .getAsJSONObject(object : JSONObjectRequestListener {
                         override fun onResponse(response: JSONObject?) {
                             this@Transaction.updateWith(response)
+                            callback?.transactionCreated()
                         }
                         override fun onError(anError: ANError?) {
                             callback?.didError(anError?.bucketError)
