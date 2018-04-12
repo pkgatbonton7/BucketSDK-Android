@@ -276,7 +276,11 @@ var VolleyError?.bucketError : Bucket.Error?
     get() {
         if (this.isNil) return null
         val code = this!!.networkResponse.statusCode
-        val json = JSONObject(String(this.networkResponse.data))
-        return Bucket.Error(json.getString("message"), code)
+        if (code == 401) return Bucket.Error("Unauthorized", code)
+        else if (code == 400) {
+            val json = JSONObject(String(this.networkResponse.data))
+            return Bucket.Error(json.getString("message"), code)
+        }
+        return Bucket.Error("Unknown Error", code)
     }
     set(value) {  }
