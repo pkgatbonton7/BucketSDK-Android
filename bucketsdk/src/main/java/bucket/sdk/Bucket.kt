@@ -57,7 +57,11 @@ class Bucket {
         }
     }
 
-    class Error(var message: String?, var code : Int?)
+    class Error(var message: String?, var code : Int?) {
+        companion object {
+            @JvmStatic val unauthorized : Bucket.Error = Bucket.Error("Unauthorized", 401)
+        }
+    }
 
     class Retailer {
         companion object {
@@ -68,26 +72,6 @@ class Bucket {
                 json.put("username", username)
 
                 val url = Bucket.environment.retailerLogin().build().toString()
-
-//                val request = JsonObjectRequest(Request.Method.POST, url, json, Response.Listener { responseJSON ->
-//
-//                    val clientId = responseJSON.getString("client_id")
-//                    val clientSecret = responseJSON.getString("client_secret")
-//
-//                    if (clientId.isNullOrEmpty() || clientSecret.isNullOrEmpty()) return@Listener
-//
-//                    // Now go & set the values securely:
-//                    Bucket.Credentials.setClientId(clientId)
-//                    Bucket.Credentials.setClientSecret(clientSecret)
-//
-//                    // Notify our listeners:
-//                    callback?.didLogIn()
-//
-//                }, Response.ErrorListener { error ->
-//                    callback?.didError(error.bucketError)
-//                })
-//
-//                Bucket.requestQueue?.add(request)
 
             }
         }
@@ -144,18 +128,16 @@ class Bucket {
             var shouldIReturn = false
             if (clientId.isNullOrEmpty() || clientSecret.isNullOrEmpty()) {
                 shouldIReturn = true
-                callback?.didError(Bucket.Error("You must have a client id & client secret.",null))
+                callback?.didError(Bucket.Error.unauthorized)
             }
 
             if (shouldIReturn) return
 
             val jsonBody = this.toJSON()
 
-            val url = Bucket.environment.transaction().toString()
+            val url = Bucket.environment.transaction(clientId!!, clientSecret!!).build().toString()
 
             AndroidNetworking.post(url)
-                    .addPathParameter(clientId)
-                    .addQueryParameter("code", clientSecret)
                     .addHeaders("Content-Type", "application/json; charset=UTF-8")
                     .addJSONObjectBody(jsonBody)
                     .setPriority(Priority.HIGH)
@@ -169,32 +151,6 @@ class Bucket {
                             callback?.didError(anError?.bucketError)
                         }
                     })
-
-//            val url = urlBuilder.build().toString()
-
-            // Get the request body JSON:
-
-
-            // Okay we need to go & create the request & send the information to Marco:
-//            val request = object : JsonObjectRequest(Request.Method.POST, url, httpBody, Response.Listener { response ->
-//                // Deal with the response object:
-//                this.updateWith(response)
-//                callback?.transactionCreated()
-//
-//            }, Response.ErrorListener { error ->
-//                // Tell the listener that we had an error:
-//                callback?.didError(error.bucketError)
-//
-//            }) {
-//                @Throws(AuthFailureError::class)
-//                override fun getHeaders(): Map<String, String> {
-//                    val headers = HashMap<String, String>()
-//                    headers["Content-Type"] = "application/json; charset=UTF-8"
-//                    return headers
-//                }
-//            }
-//
-//            Bucket.requestQueue?.add(request)
 
         }
 
@@ -263,8 +219,8 @@ class Bucket {
         }
 
         // PRE-BUILT ENDPOINT PATHS:
-        fun transaction(): Uri.Builder {
-            return this.bucketBaseUri().appendPath("transaction")
+        fun transaction(clientId : String, clientSecret: String): Uri.Builder {
+            return this.bucketBaseUri().appendPath("transaction").appendPath(clientId).appendQueryParameter("code", clientSecret)
         }
 
         fun retailerLogin(): Uri.Builder {
@@ -293,7 +249,7 @@ var ANError?.bucketError : Bucket.Error?
         if (this.isNil) return null
 
         val code = this!!.errorCode
-        if (code == 401) return Bucket.Error("Unauthorized", code)
+        if (code == 401) return Bucket.Error.unauthorized
         else if (code == 400) {
             val json = JSONObject(this.errorBody)
             return Bucket.Error(json.getString("message"), code)
