@@ -5,25 +5,20 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import com.android.volley.Request
-import com.android.volley.RequestQueue
-import com.android.volley.Response
-import com.android.volley.VolleyError
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
 import de.adorsys.android.securestoragelibrary.SecurePreferences
 import org.json.JSONObject
 import java.net.URL
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
-import com.android.volley.AuthFailureError
-import kotlin.collections.HashMap
-
+import com.androidnetworking.AndroidNetworking
+import com.androidnetworking.common.Priority
+import com.androidnetworking.error.ANError
+import com.androidnetworking.interfaces.JSONObjectRequestListener
 
 class Bucket {
     companion object {
-        @JvmStatic var requestQueue : RequestQueue? = null
+
         @SuppressLint("SimpleDateFormat") @JvmStatic val df : DateFormat = SimpleDateFormat("yyyyMMdd")
 
         @JvmStatic var appContext : Context? = null
@@ -31,7 +26,7 @@ class Bucket {
                 // Make this a regular setter:
                 field = value
                 if (!value.isNil) {
-                    this.requestQueue = Volley.newRequestQueue(value!!)
+                    AndroidNetworking.initialize(value)
                 }
             }
 
@@ -74,25 +69,25 @@ class Bucket {
 
                 val url = Bucket.environment.retailerLogin().build().toString()
 
-                val request = JsonObjectRequest(Request.Method.POST, url, json, Response.Listener { responseJSON ->
-
-                    val clientId = responseJSON.getString("client_id")
-                    val clientSecret = responseJSON.getString("client_secret")
-
-                    if (clientId.isNullOrEmpty() || clientSecret.isNullOrEmpty()) return@Listener
-
-                    // Now go & set the values securely:
-                    Bucket.Credentials.setClientId(clientId)
-                    Bucket.Credentials.setClientSecret(clientSecret)
-
-                    // Notify our listeners:
-                    callback?.didLogIn()
-
-                }, Response.ErrorListener { error ->
-                    callback?.didError(error.bucketError)
-                })
-
-                Bucket.requestQueue?.add(request)
+//                val request = JsonObjectRequest(Request.Method.POST, url, json, Response.Listener { responseJSON ->
+//
+//                    val clientId = responseJSON.getString("client_id")
+//                    val clientSecret = responseJSON.getString("client_secret")
+//
+//                    if (clientId.isNullOrEmpty() || clientSecret.isNullOrEmpty()) return@Listener
+//
+//                    // Now go & set the values securely:
+//                    Bucket.Credentials.setClientId(clientId)
+//                    Bucket.Credentials.setClientSecret(clientSecret)
+//
+//                    // Notify our listeners:
+//                    callback?.didLogIn()
+//
+//                }, Response.ErrorListener { error ->
+//                    callback?.didError(error.bucketError)
+//                })
+//
+//                Bucket.requestQueue?.add(request)
 
             }
         }
@@ -111,11 +106,13 @@ class Bucket {
         var locationId                      : String? = null
         var terminalId                      : String? = Build.SERIAL
 
-        private fun updateWith(json: JSONObject) {
+        private fun updateWith(updateJSON: JSONObject?) {
 
-            this.customerCode = json.getString("customerCode")
-            this.bucketTransactionId = json.getString("bucketTransactionId")
-            this.qrCodeContent = json.getURL("qrCodeContent")
+            if (updateJSON.isNil) return
+
+            this.customerCode = updateJSON!!.getString("customerCode")
+            this.bucketTransactionId = updateJSON.getString("bucketTransactionId")
+            this.qrCodeContent = updateJSON.getURL("qrCodeContent")
 
         }
 
@@ -152,33 +149,51 @@ class Bucket {
 
             if (shouldIReturn) return
 
-            val urlBuilder = Bucket.environment.transaction(clientId!!, clientSecret!!)
+            val jsonBody = this.toJSON()
 
-            val url = urlBuilder.build().toString()
+            val url = Bucket.environment.transaction().toString()
+
+            AndroidNetworking.post(url)
+                    .addPathParameter(clientId)
+                    .addQueryParameter("code", clientSecret)
+                    .addHeaders("Content-Type", "application/json; charset=UTF-8")
+                    .addJSONObjectBody(jsonBody)
+                    .setPriority(Priority.HIGH)
+                    .build()
+                    .getAsJSONObject(object : JSONObjectRequestListener {
+                        override fun onResponse(response: JSONObject?) {
+                            this@Transaction.updateWith(response)
+                        }
+                        override fun onError(anError: ANError?) {
+                            callback?.didError(anError?.bucketError)
+                        }
+                    })
+
+//            val url = urlBuilder.build().toString()
 
             // Get the request body JSON:
-            val httpBody = this.toJSON()
+
 
             // Okay we need to go & create the request & send the information to Marco:
-            val request = object : JsonObjectRequest(Request.Method.POST, url, httpBody, Response.Listener { response ->
-                // Deal with the response object:
-                this.updateWith(response)
-                callback?.transactionCreated()
-
-            }, Response.ErrorListener { error ->
-                // Tell the listener that we had an error:
-                callback?.didError(error.bucketError)
-
-            }) {
-                @Throws(AuthFailureError::class)
-                override fun getHeaders(): Map<String, String> {
-                    val headers = HashMap<String, String>()
-                    headers["Content-Type"] = "application/json; charset=UTF-8"
-                    return headers
-                }
-            }
-
-            Bucket.requestQueue?.add(request)
+//            val request = object : JsonObjectRequest(Request.Method.POST, url, httpBody, Response.Listener { response ->
+//                // Deal with the response object:
+//                this.updateWith(response)
+//                callback?.transactionCreated()
+//
+//            }, Response.ErrorListener { error ->
+//                // Tell the listener that we had an error:
+//                callback?.didError(error.bucketError)
+//
+//            }) {
+//                @Throws(AuthFailureError::class)
+//                override fun getHeaders(): Map<String, String> {
+//                    val headers = HashMap<String, String>()
+//                    headers["Content-Type"] = "application/json; charset=UTF-8"
+//                    return headers
+//                }
+//            }
+//
+//            Bucket.requestQueue?.add(request)
 
         }
 
@@ -247,8 +262,8 @@ class Bucket {
         }
 
         // PRE-BUILT ENDPOINT PATHS:
-        fun transaction(clientId: String, clientSecret: String): Uri.Builder {
-            return this.bucketBaseUri().appendPath("transaction").appendPath(clientId).appendQueryParameter("code", clientSecret)
+        fun transaction(): Uri.Builder {
+            return this.bucketBaseUri().appendPath("transaction")
         }
 
         fun retailerLogin(): Uri.Builder {
@@ -272,15 +287,16 @@ var Date.toYYYYMMDD : String
     get() { return Bucket.df.format(this) }
     set(value) {  }
 
-var VolleyError?.bucketError : Bucket.Error?
+var ANError?.bucketError : Bucket.Error?
     get() {
         if (this.isNil) return null
-        val code = this!!.networkResponse.statusCode
+
+        val code = this!!.errorCode
         if (code == 401) return Bucket.Error("Unauthorized", code)
         else if (code == 400) {
-            val json = JSONObject(String(this.networkResponse.data))
+            val json = JSONObject(this.errorBody)
             return Bucket.Error(json.getString("message"), code)
         }
         return Bucket.Error("Unknown Error", code)
     }
-    set(value) {  }
+    private set(value) {  }
