@@ -57,11 +57,6 @@ class Bucket {
         }
 
         @JvmStatic fun fetchBillDenominations(countryCode: String, callback: Callbacks.BillDenomination?) {
-            var shouldReturn = false
-            if (countryCode.equals("USD"))  {
-                callback?.setBillDenoms(); shouldReturn = true
-            }
-            if (shouldReturn) return
 
             AndroidNetworking.get("https://bucketresources.blob.core.windows.net/static/Currencies.json")
                     .build().getAsJSONObject(object : JSONObjectRequestListener {
@@ -84,9 +79,9 @@ class Bucket {
                                         }
                                         // Now set the denominations:
                                         Bucket.denoms = theDenoms
-                                    } else {
-                                        usesNaturalChangeFunction = false
-                                    }
+                                    } else usesNaturalChangeFunction = false
+                                    // Let our interface know we finished processing:
+                                    callback?.setBillDenoms()
                                 }
                             }
                         }
