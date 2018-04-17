@@ -68,7 +68,7 @@ class Bucket {
 
                                     val json = it.getJSONObject(i)
 
-                                    if (!json.getString("currencyCode").equals(countryCode)) continue
+                                    if (json.getString("currencyCode") != countryCode) continue
                                     // Okay we are good to process.. Lets check if we need to set this for the natural change function:
                                     if (json.getBoolean("useNaturalChangeFunction")) {
                                         usesNaturalChangeFunction = true
