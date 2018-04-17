@@ -31,7 +31,7 @@ class Bucket {
             }
 
         @JvmStatic var environment : Bucket.DeploymentEnvironment = Bucket.DeploymentEnvironment.Development
-        @JvmStatic private var denoms : List<Int> = listOf(10000, 5000, 2000, 1000, 500, 200)
+        @JvmStatic var denoms : List<Int> = listOf(10000, 5000, 2000, 1000, 500, 200)
         @JvmStatic fun bucketAmount(changeDueBack: Long): Long {
             var bucketAmount = changeDueBack
             // Make sure this is ordered by the amount
