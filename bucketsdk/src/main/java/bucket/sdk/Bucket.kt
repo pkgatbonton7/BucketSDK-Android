@@ -17,9 +17,10 @@ import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 
 class Bucket {
+
     companion object {
 
-        @SuppressLint("SimpleDateFormat") @JvmStatic val df : DateFormat = SimpleDateFormat("yyyyMMdd")
+        @SuppressLint("SimpleDateFormat") @JvmStatic private val df : DateFormat = SimpleDateFormat("yyyyMMdd")
 
         @JvmStatic var appContext : Context? = null
             set(value) {
@@ -72,7 +73,9 @@ class Bucket {
                 json.put("password", password)
                 json.put("username", username)
 
-                val url = Bucket.environment.retailerLogin().build().toString()
+//                val url = Bucket.environment.retailerLogin().build().toString()
+                
+                callback?.didError(Bucket.Error("Retailer login is not supported just yet.", null))
 
             }
         }
@@ -106,7 +109,7 @@ class Bucket {
             val obj = JSONObject()
 
             // Set the intervalId to this date:
-            intervalId = Date().toYYYYMMDD
+            intervalId = df.format(Date())
             // We will always set the amount & clientTransactionId when sending the JSON:
             obj.put("amount", amount)
             obj.put("clientTransactionId", clientTransactionId)
@@ -240,10 +243,6 @@ annotation class PrimaryKey
 var Any?.isNil : Boolean
     get() { return this == null }
     private set(value) {}
-
-var Date.toYYYYMMDD : String
-    get() { return Bucket.df.format(this) }
-    set(value) {  }
 
 var ANError?.bucketError : Bucket.Error?
     get() {
