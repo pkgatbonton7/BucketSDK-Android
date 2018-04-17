@@ -34,18 +34,26 @@ class Bucket {
 
         @JvmStatic var environment : Bucket.DeploymentEnvironment = Bucket.DeploymentEnvironment.Development
         @JvmStatic private var denoms : List<Int> = listOf(10000, 5000, 2000, 1000, 500, 200, 100)
+        @JvmStatic private var usesNaturalChangeFunction : Boolean
+            get() { return SecurePreferences.getBooleanValue("usesNaturalChangeFunction", false) }
+            set(value) { SecurePreferences.setValue("usesNaturalChangeFunction", value) }
+
         @JvmStatic fun bucketAmount(changeDueBack: Long): Long {
-
             var bucketAmount = changeDueBack
-            // Make sure this is ordered by the amount
-            val filteredDenoms = denoms.filter { it <= changeDueBack }
+            if (usesNaturalChangeFunction) {
+                // Make sure this is ordered by the amount
+                val filteredDenoms = denoms.filter { it <= changeDueBack }
 
-            // These values should already be descended from 10000 down to 100.
-            filteredDenoms.forEach { denomination ->
-                bucketAmount = (bucketAmount % denomination)
+                // These values should already be descended from 10000 down to 100.
+                filteredDenoms.forEach { denomination ->
+                    bucketAmount = (bucketAmount % denomination)
+                }
+
+                return bucketAmount
+            } else {
+                while (bucketAmount > 100) bucketAmount = (bucketAmount % 100)
+                return bucketAmount
             }
-
-            return bucketAmount
         }
 
         @JvmStatic fun fetchBillDenominations(countryCode: String, callback: Callbacks.BillDenomination?) {
@@ -64,15 +72,19 @@ class Bucket {
                                     val json = it.getJSONObject(i)
 
                                     if (!json.getString("currencyCode").equals(countryCode)) continue
-                                    // Okay we are good to process.
-                                    val theds = json.getJSONArray("commonDenominations")
-                                    val theDenoms:MutableList<Int> = ArrayList()
-                                    for (j in 0..(theds.length()-1)) {
-                                        theDenoms.add(j, theds.getInt(j))
+                                    // Okay we are good to process.. Lets check if we need to set this for the natural change function:
+                                    if (json.getBoolean("useNaturalChangeFunction")) {
+                                        usesNaturalChangeFunction = true
+                                        val theds = json.getJSONArray("commonDenominations")
+                                        val theDenoms:MutableList<Int> = ArrayList()
+                                        for (j in 0..(theds.length()-1)) {
+                                            theDenoms.add(j, theds.getInt(j))
+                                        }
+                                        // Now set the denominations:
+                                        Bucket.denoms = theDenoms
+                                    } else {
+                                        usesNaturalChangeFunction = false
                                     }
-
-                                    // Now set the denominations:
-                                    Bucket.denoms = theDenoms
                                 }
                             }
                         }
