@@ -1,3 +1,5 @@
+[![](https://jitpack.io/v/buckettech/BucketSDK-Android.svg)](https://jitpack.io/#buckettech/BucketSDK-Android)
+
 # BucketSDK-Android
 This is the BucketSDK for Android.  Here is where you can create transactions & other important features of the Bucket API pre-wrapped for Android.
 
@@ -10,7 +12,7 @@ BucketSDK is available through [JitPack](https://jitpack.io). To install
 it, simply add the following line to your gradle file:
 
 ```gradle
-implementation 'com.github.buckettech:BucketSDK-Android:1.0.3'
+implementation 'com.github.buckettech:BucketSDK-Android:1.1'
 ```
 
 ## Usage
