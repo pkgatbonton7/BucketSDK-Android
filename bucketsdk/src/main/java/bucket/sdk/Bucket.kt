@@ -58,7 +58,9 @@ class Bucket {
 
         @JvmStatic fun fetchBillDenominations(countryCode: String, callback: Callbacks.BillDenomination?) {
             var shouldReturn = false
-            if (countryCode.equals("USD")) callback?.setBillDenoms(); shouldReturn = true
+            if (countryCode.equals("USD"))  {
+                callback?.setBillDenoms(); shouldReturn = true
+            }
             if (shouldReturn) return
 
             AndroidNetworking.get("https://bucketresources.blob.core.windows.net/static/Currencies.json")
