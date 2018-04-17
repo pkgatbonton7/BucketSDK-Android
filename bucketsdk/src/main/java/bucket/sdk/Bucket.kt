@@ -15,6 +15,8 @@ import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.common.Priority
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
+import org.json.JSONArray
+import kotlin.collections.ArrayList
 
 class Bucket {
 
@@ -32,7 +34,7 @@ class Bucket {
             }
 
         @JvmStatic var environment : Bucket.DeploymentEnvironment = Bucket.DeploymentEnvironment.Development
-        @JvmStatic var denoms : List<Int> = listOf(10000, 5000, 2000, 1000, 500, 200, 100)
+        @JvmStatic private var denoms : List<Int> = listOf(10000, 5000, 2000, 1000, 500, 200, 100)
         @JvmStatic fun bucketAmount(changeDueBack: Long): Long {
 
             var bucketAmount = changeDueBack
@@ -47,6 +49,40 @@ class Bucket {
             return bucketAmount
         }
 
+        @JvmStatic fun fetchBillDenominations(countryCode: String, callback: Callbacks.BillDenomination?) {
+            var shouldReturn = false
+            if (countryCode.equals("USD")) callback?.setBillDenoms(); shouldReturn = true
+            if (shouldReturn) return
+
+            AndroidNetworking.get("https://bucketresources.blob.core.windows.net/static/Currencies.json")
+                    .build().getAsJSONObject(object : JSONObjectRequestListener {
+                        override fun onResponse(response: JSONObject?) {
+                            // Deal with the data:
+                            val denoms = response?.getJSONArray("currencies")
+                            denoms?.let {
+                                for (i in 0..(it.length()-1)) {
+
+                                    val json = it.getJSONObject(i)
+
+                                    if (!json.getString("currencyCode").equals(countryCode)) continue
+                                    // Okay we are good to process.
+                                    val theds = json.getJSONArray("commonDenominations")
+                                    val theDenoms:MutableList<Int> = ArrayList()
+                                    for (j in 0..(theds.length()-1)) {
+                                        theDenoms.add(j, theds.getInt(j))
+                                    }
+
+                                    // Now set the denominations:
+                                    Bucket.denoms = theDenoms
+                                }
+                            }
+                        }
+                        override fun onError(anError: ANError?) {
+                            callback?.didError(anError.bucketError)
+                        }
+                    })
+        }
+
     }
     class Callbacks {
         abstract class RetailerLogin {
@@ -55,6 +91,10 @@ class Bucket {
         }
         abstract class CreateTransaction {
             abstract fun transactionCreated()
+            abstract fun didError(error: Bucket.Error?)
+        }
+        abstract class BillDenomination {
+            abstract fun setBillDenoms()
             abstract fun didError(error: Bucket.Error?)
         }
     }
