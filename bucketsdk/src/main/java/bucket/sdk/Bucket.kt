@@ -49,11 +49,11 @@ class Bucket {
                     bucketAmount = (bucketAmount % denomination)
                 }
 
-                return bucketAmount
             } else {
                 while (bucketAmount > 100) bucketAmount = (bucketAmount % 100)
-                return bucketAmount
+
             }
+            return bucketAmount
         }
 
         @JvmStatic fun fetchBillDenominations(countryCode: String, callback: Callbacks.BillDenomination?) {
