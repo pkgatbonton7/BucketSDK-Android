@@ -12,7 +12,7 @@ BucketSDK is available through [JitPack](https://jitpack.io). To install
 it, simply add the following line to your gradle file:
 
 ```gradle
-implementation 'com.github.buckettech:BucketSDK-Android:1.1'
+implementation "com.github.buckettech:BucketSDK-Android:$bucketSDKVersion"
 ```
 
 ## Usage
