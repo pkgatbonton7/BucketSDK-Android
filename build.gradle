@@ -16,24 +16,6 @@ buildscript {
     }
 }
 
-ext {
-    bintrayRepo = 'BucketSDK-Android' // your repo name
-    bintrayName = 'bucketsdk' // has to be same as your library module name
-    publishedGroupId = 'bucket.sdk' // your module package name
-    libraryName = 'bucketsdk'
-    artifact = 'bucketsdk' // has to be same as your library module name
-    libraryDescription = 'A wrapper around the Bucket API.'
-    siteUrl = 'https://buckettechnologies.visualstudio.com/BucketSDK/_git/Android'
-//    gitUrl = 'https://github.com/androidCode/time-utils.git'
-    libraryVersion = '1.0'
-    developerId = 'ryancoyne'
-    developerName = 'Ryan'
-    developerEmail = 'ryan@buckettechnologies.com'
-    licenseName = 'The MIT License'
-    licenseUrl = 'https://opensource.org/licenses/MIT'
-    allLicenses = ["MIT"]
-}
-
 allprojects {
     repositories {
         google()
