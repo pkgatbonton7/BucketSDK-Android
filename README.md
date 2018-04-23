@@ -36,6 +36,7 @@ Bucket.appContext = theAppContext
 ### Setting your currency code:
 SGD (Singapore) & USD (USA) currencies are currently supported.
 ```Java
+// Java:
 Bucket.fetchBillDenominations("USD", new Bucket.Callbacks.BillDenomination() {
     @Override public void setBillDenoms() {
         
@@ -47,6 +48,7 @@ Bucket.fetchBillDenominations("USD", new Bucket.Callbacks.BillDenomination() {
 ```
 
 ```kotlin
+// Kotlin:
 Bucket.fetchBillDenominations("USD", object : Bucket.Callbacks.BillDenomination() {
     override fun setBillDenoms() {
     
