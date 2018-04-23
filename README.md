@@ -18,19 +18,45 @@ implementation "com.github.buckettech:BucketSDK-Android:$bucketSDKVersion"
 ## Usage
 Using the BucketSDK, you will be able to use either Java or Kotlin to access the functions that you will need.
 ### Setting the app context & app environment
-```
+```Java
 // Java:
 Bucket.setAppContext(BucketApp.appContext);
 if (!BuildConfig.DEBUG) {
     Bucket.setEnvironment(Bucket.DeploymentEnvironment.Production);
 }
-
+```
+```Kotlin
 // Kotlin
 if (!BuildConfig.DEBUG) {
     Bucket.environment = Bucket.DeploymentEnvironment.Production
 }
 Bucket.appContext = theAppContext
 ```
+
+### Setting your currency code:
+SGD (Singapore) & USD (USA) currencies are currently supported.
+```Java
+Bucket.fetchBillDenominations("USD", new Bucket.Callbacks.BillDenomination() {
+    @Override public void setBillDenoms() {
+        
+    }
+    @Override public void didError(Bucket.Error error) {
+        
+    }
+});
+```
+
+```kotlin
+Bucket.fetchBillDenominations("USD", object : Bucket.Callbacks.BillDenomination() {
+    override fun setBillDenoms() {
+    
+    }
+    override fun didError(error: Bucket.Error?) {
+                        
+    }
+})
+```
+
 ### Getting the Bucket Amount
 ```Java
 // Java:
@@ -40,9 +66,8 @@ long bucketAmount = Bucket.bucketAmount(789);
 val bucketAmount = Bucket.bucketAmount(789)
 ```
 ### Creating a transaction
-```
-// You will need to use the bucketAmount function to set the transaction amount here.
-
+You will need to use the bucketAmount function to set the transaction amount here.
+```Java
 // Java:
 Bucket.Transaction tr = new Bucket.Transaction(90, "XCFRTDSFGGOL");
 tr.create(new Bucket.Callbacks.CreateTransaction() {
@@ -53,7 +78,8 @@ tr.create(new Bucket.Callbacks.CreateTransaction() {
         // There was an error.
     }
 });
-
+```
+```Kotlin
 // Kotlin:
 val transaction = Bucket.Transaction(789, "XCFRTDSFGGOL")
 transaction.create(object : Bucket.Callbacks.CreateTransaction() {
