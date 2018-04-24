@@ -278,6 +278,9 @@ class Bucket {
         fun transaction(clientId : String, clientSecret: String): Uri.Builder {
             return this.bucketBaseUri().appendPath("transaction").appendPath(clientId).appendQueryParameter("code", clientSecret)
         }
+        fun closeInterval(clientId: String, clientSecret: String): Uri.Builder {
+            return this.bucketBaseUri().appendPath("closeInterval").appendPath(clientId).appendQueryParameter("code", clientSecret)
+        }
 
         fun retailerLogin(): Uri.Builder {
             return this.retailerBaseUri().appendPath("login")
