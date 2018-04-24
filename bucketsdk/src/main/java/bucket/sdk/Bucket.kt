@@ -5,7 +5,6 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import android.text.style.LocaleSpan
 import de.adorsys.android.securestoragelibrary.SecurePreferences
 import org.json.JSONObject
 import java.net.URL
