@@ -21,11 +21,12 @@ class Bucket {
 
     companion object {
 
-        init {
-            Bucket.df.timeZone = TimeZone.getTimeZone("UTC")
-        }
-
-        @SuppressLint("SimpleDateFormat") @JvmStatic private val df : DateFormat = SimpleDateFormat("yyyyMMdd")
+        @JvmStatic private var tz : TimeZone = TimeZone.getTimeZone("UTC")
+        @JvmStatic private var df : DateFormat = SimpleDateFormat("yyyyMMdd")
+            get() {
+                if (field.timeZone != tz) field.timeZone = tz
+                return field
+            }
 
         @JvmStatic var appContext : Context? = null
             set(value) {
