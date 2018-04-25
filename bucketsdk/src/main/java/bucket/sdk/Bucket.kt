@@ -86,7 +86,13 @@ class Bucket {
                             callback?.didError(anError?.bucketError)
                         }
                         override fun onResponse(response: JSONObject?) {
-                            callback?.closedInterval()
+                            callback?.let {
+                                response?.let {
+                                    it.getString("intervalId")?.let {
+                                        callback.closedInterval(it)
+                                    }
+                                }
+                            }
                         }
                     })
 
@@ -142,7 +148,7 @@ class Bucket {
             abstract fun didError(error: Bucket.Error?)
         }
         abstract class CloseInterval {
-            abstract fun closedInterval()
+            abstract fun closedInterval(intervalId: String?)
             abstract fun didError(error: Bucket.Error?)
         }
     }
