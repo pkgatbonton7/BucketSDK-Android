@@ -37,7 +37,7 @@ class Bucket {
                 }
             }
 
-        @JvmStatic var environment : Bucket.DeploymentEnvironment = Bucket.DeploymentEnvironment.Development
+        @JvmStatic var environment : DeploymentEnvironment = DeploymentEnvironment.Development
         @JvmStatic private var denoms : List<Int> = listOf(10000, 5000, 2000, 1000, 500, 200, 100)
         @JvmStatic private var usesNaturalChangeFunction : Boolean
             get() { return SecurePreferences.getBooleanValue("usesNaturalChangeFunction", false) }
@@ -59,6 +59,37 @@ class Bucket {
 
             }
             return bucketAmount
+        }
+
+        @JvmStatic fun close(interval: String, callback: Callbacks.CloseInterval?) {
+
+            // Get the client id & client secret for this retailer:
+            val retailerId = Credentials.clientId()
+            val retailerSecret = Credentials.clientSecret()
+
+            var shouldIReturn = false
+            if (retailerId.isNullOrEmpty() || retailerSecret.isNullOrEmpty()) {
+                shouldIReturn = true
+                callback?.didError(Error.unauthorized)
+            }
+
+            if (shouldIReturn) return
+
+            // Okay we have the information we need for the request:
+            val theURL = environment.closeInterval(retailerId!!, interval).build().toString()
+
+            AndroidNetworking.get(theURL)
+                    .addHeaders("x-functions-key", retailerSecret!!)
+                    .build()
+                    .getAsJSONObject(object : JSONObjectRequestListener {
+                        override fun onError(anError: ANError?) {
+                            callback?.didError(anError?.bucketError)
+                        }
+                        override fun onResponse(response: JSONObject?) {
+                            callback?.closedInterval()
+                        }
+                    })
+
         }
 
         @JvmStatic fun fetchBillDenominations(countryCode: String, callback: Callbacks.BillDenomination?) {
@@ -110,25 +141,27 @@ class Bucket {
             abstract fun setBillDenoms()
             abstract fun didError(error: Bucket.Error?)
         }
+        abstract class CloseInterval {
+            abstract fun closedInterval()
+            abstract fun didError(error: Bucket.Error?)
+        }
     }
 
     class Error(var message: String?, var code : Int?) {
         companion object {
-            @JvmStatic val unauthorized : Bucket.Error = Bucket.Error("Unauthorized", 401)
+            @JvmStatic val unauthorized : Bucket.Error = Error("Unauthorized", 401)
         }
     }
 
     class Retailer {
         companion object {
-            @JvmStatic fun logInWith(password: String, username: String, callback: Bucket.Callbacks.RetailerLogin?) {
+            @JvmStatic fun logInWith(password: String, username: String, callback: Callbacks.RetailerLogin?) {
 
                 val json = JSONObject()
                 json.put("password", password)
                 json.put("username", username)
 
-//                val url = Bucket.environment.retailerLogin().build().toString()
-                
-                callback?.didError(Bucket.Error("Retailer login is not supported just yet.", null))
+                callback?.didError(Error("Retailer login is not supported just yet.", null))
 
             }
         }
@@ -176,27 +209,27 @@ class Bucket {
             return obj
         }
 
-        fun create(callback: Bucket.Callbacks.CreateTransaction?) {
+        fun create(callback: Callbacks.CreateTransaction?) {
 
             // Get the client id & client secret for this retailer:
-            val clientId = Bucket.Credentials.clientId()
-            val clientSecret = Bucket.Credentials.clientSecret()
+            val retailerId = Credentials.clientId()
+            val retailerSecret = Credentials.clientSecret()
 
             var shouldIReturn = false
-            if (clientId.isNullOrEmpty() || clientSecret.isNullOrEmpty()) {
+            if (retailerId.isNullOrEmpty() || retailerSecret.isNullOrEmpty()) {
                 shouldIReturn = true
-                callback?.didError(Bucket.Error.unauthorized)
+                callback?.didError(Error.unauthorized)
             }
 
             if (shouldIReturn) return
 
             val jsonBody = this.toJSON()
 
-            val url = Bucket.environment.transaction(clientId!!).build().toString()
+            val url = environment.transaction(retailerId!!).build().toString()
 
             AndroidNetworking.post(url)
                     .addHeaders("Content-Type", "application/json; charset=UTF-8")
-                    .addHeaders("x-functions-key", clientSecret!!)
+                    .addHeaders("x-functions-key", retailerSecret!!)
                     .addJSONObjectBody(jsonBody)
                     .setPriority(Priority.HIGH)
                     .build()
@@ -218,7 +251,7 @@ class Bucket {
 
         @JvmStatic fun clientId(): String? {
             // The only thing hardcoded here is the /clientId.  This makes it so the hacker would need the actual device to read the clientId or clientSecret, which would mean we already have a security breach.
-            @SuppressLint("HardwareIds") var theKey = Settings.Secure.getString(Bucket.appContext?.contentResolver, Settings.Secure.ANDROID_ID)
+            @SuppressLint("HardwareIds") var theKey = Settings.Secure.getString(appContext?.contentResolver, Settings.Secure.ANDROID_ID)
             theKey += "/clientId"
             return SecurePreferences.getStringValue(theKey, null)
 
