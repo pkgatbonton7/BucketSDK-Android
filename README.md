@@ -94,4 +94,23 @@ transaction.create(object : Bucket.Callbacks.CreateTransaction() {
 })
 ```
 
+### Closing the start-to-end of day
+```Java
+// Java:
+```
+
+```kotlin
+// Kotlin:
+Bucket.close(interval, object : Bucket.Callbacks.CloseInterval() {
+    override fun closedInterval(intervalId: String) {
+        val editor = sharedPref.edit()
+        editor.putString(BucketConstants.LAST_INTERVAL_ID, intervalId)
+        editor.apply()
+    }
+    override fun didError(error: Bucket.Error?) {
+        //TODO: Handle the error:
+    }
+})
+```
+
 ## Author
