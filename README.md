@@ -97,15 +97,21 @@ transaction.create(object : Bucket.Callbacks.CreateTransaction() {
 ### Closing the start-to-end of day
 ```Java
 // Java:
+Bucket.close(interval, new Bucket.Callbacks.CloseInterval() {
+    @Override public void closedInterval(String intervalId) {
+        // The interval has been closed!
+    }
+    @Override public void didError(VolleyError volleyError) {
+        // There was an error.
+    }
+});
 ```
 
 ```kotlin
 // Kotlin:
 Bucket.close(interval, object : Bucket.Callbacks.CloseInterval() {
     override fun closedInterval(intervalId: String) {
-        val editor = sharedPref.edit()
-        editor.putString(BucketConstants.LAST_INTERVAL_ID, intervalId)
-        editor.apply()
+        // The interval has been closed!
     }
     override fun didError(error: Bucket.Error?) {
         //TODO: Handle the error:
