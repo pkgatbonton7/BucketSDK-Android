@@ -156,19 +156,14 @@ class Bucket {
     class Error(var message: String?, var code : Int?) {
         companion object {
             @JvmStatic val unauthorized : Bucket.Error = Error("Unauthorized", 401)
+            @JvmStatic val unsupportedMethod : Bucket.Error = Bucket.Error("Unsupported API function.", null)
         }
     }
 
     class Retailer {
         companion object {
             @JvmStatic fun logInWith(password: String, username: String, callback: Callbacks.RetailerLogin?) {
-
-                val json = JSONObject()
-                json.put("password", password)
-                json.put("username", username)
-
-                callback?.didError(Error("Retailer login is not supported just yet.", null))
-
+                callback?.didError(Error.unsupportedMethod)
             }
         }
     }
@@ -248,7 +243,6 @@ class Bucket {
                             callback?.didError(anError?.bucketError)
                         }
                     })
-
         }
 
     }
@@ -317,13 +311,13 @@ class Bucket {
 
         // PRE-BUILT ENDPOINT PATHS:
         fun transaction(clientId : String): Uri.Builder {
-            return this.bucketBaseUri().appendPath("transaction").appendPath(clientId)
+            return bucketBaseUri().appendPath("transaction").appendPath(clientId)
         }
         fun closeInterval(clientId: String, intervalId : String): Uri.Builder {
-            return this.bucketBaseUri().appendPath("closeInterval").appendPath(clientId).appendPath(intervalId)
+            return bucketBaseUri().appendPath("closeInterval").appendPath(clientId).appendPath(intervalId)
         }
         fun retailerLogin(): Uri.Builder {
-            return this.retailerBaseUri().appendPath("login")
+            return retailerBaseUri().appendPath("login")
         }
     }
 }
