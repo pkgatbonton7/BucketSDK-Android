@@ -22,7 +22,7 @@ class Bucket {
     companion object {
 
         @JvmStatic private var tz : TimeZone = TimeZone.getTimeZone("UTC")
-        @JvmStatic private var df : DateFormat = SimpleDateFormat("yyyyMMdd")
+        @JvmStatic private var df : DateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
             get() {
                 if (field.timeZone != tz) field.timeZone = tz
                 return field
@@ -192,10 +192,11 @@ class Bucket {
 
             val jsonBody = this.toJSON()
 
-            val url = Bucket.environment.transaction(clientId!!, clientSecret!!).build().toString()
+            val url = Bucket.environment.transaction(clientId!!).build().toString()
 
             AndroidNetworking.post(url)
                     .addHeaders("Content-Type", "application/json; charset=UTF-8")
+                    .addHeaders("x-functions-key", clientSecret!!)
                     .addJSONObjectBody(jsonBody)
                     .setPriority(Priority.HIGH)
                     .build()
@@ -276,13 +277,12 @@ class Bucket {
         }
 
         // PRE-BUILT ENDPOINT PATHS:
-        fun transaction(clientId : String, clientSecret: String): Uri.Builder {
-            return this.bucketBaseUri().appendPath("transaction").appendPath(clientId).appendQueryParameter("code", clientSecret)
+        fun transaction(clientId : String): Uri.Builder {
+            return this.bucketBaseUri().appendPath("transaction").appendPath(clientId)
         }
-        fun closeInterval(clientId: String, clientSecret: String, intervalId : String): Uri.Builder {
-            return this.bucketBaseUri().appendPath("closeInterval").appendPath(clientId).appendPath(intervalId).appendQueryParameter("code", clientSecret)
+        fun closeInterval(clientId: String, intervalId : String): Uri.Builder {
+            return this.bucketBaseUri().appendPath("closeInterval").appendPath(clientId).appendPath(intervalId)
         }
-
         fun retailerLogin(): Uri.Builder {
             return this.retailerBaseUri().appendPath("login")
         }
