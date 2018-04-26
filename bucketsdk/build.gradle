@@ -26,7 +26,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.amitshekhar.android:android-networking:1.0.0'
-    implementation 'de.adorsys.android:securestoragelibrary:1.0.2'
+
 }
 repositories {
     mavenCentral()

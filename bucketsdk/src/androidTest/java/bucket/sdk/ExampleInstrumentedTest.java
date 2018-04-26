@@ -28,22 +28,41 @@ public class ExampleInstrumentedTest {
         assertEquals("bucket.sdk", appContext.getPackageName());
     }
 
-    @Test public void testCreateTransaction() {
-
+    @Test
+    public void testSettingClientId() {
         Bucket.setAppContext(InstrumentationRegistry.getTargetContext());
-        Bucket.Transaction trans = new Bucket.Transaction(78, "MyClientTransId");
 
-        trans.create(new Bucket.Callbacks.CreateTransaction() {
-            @Override public void transactionCreated() {
-                assertTrue(true);
-            }
-            @Override public void didError(@Nullable Bucket.Error error) {
-                if (error != null) {
-                    Log.d("Error", error.getMessage());
-                }
-                assertFalse(false);
-            }
-        });
+        String retailerId = "RandomRetailerId";
+        Bucket.Credentials.setClientId(retailerId);
+        assertEquals(retailerId, Bucket.Credentials.clientId());
+
     }
+
+    @Test
+    public void testSettingClientSecret() {
+        Bucket.setAppContext(InstrumentationRegistry.getTargetContext());
+
+        String retailerSecret = "RandomClientSecret";
+        Bucket.Credentials.setClientSecret(retailerSecret);
+        assertEquals(retailerSecret, Bucket.Credentials.clientSecret());
+    }
+
+//    @Test public void testCreateTransaction() {
+//
+//        Bucket.setAppContext(InstrumentationRegistry.getTargetContext());
+//        Bucket.Transaction trans = new Bucket.Transaction(78, "MyClientTransId");
+//
+//        trans.create(new Bucket.Callbacks.CreateTransaction() {
+//            @Override public void transactionCreated() {
+//                assertTrue(true);
+//            }
+//            @Override public void didError(@Nullable Bucket.Error error) {
+//                if (error != null) {
+//                    Log.d("Error", String.valueOf(error.getCode()));
+//                }
+//                fail();
+//            }
+//        });
+//    }
 
 }

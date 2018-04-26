@@ -1,18 +1,13 @@
 package bucket.sdk
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.os.Build
-import android.provider.Settings
-import de.adorsys.android.securestoragelibrary.SecurePreferences
 import org.json.JSONObject
 import java.net.URL
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import com.androidnetworking.AndroidNetworking
-import com.androidnetworking.common.Priority
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 import kotlin.collections.ArrayList
@@ -40,8 +35,12 @@ class Bucket {
         @JvmStatic var environment : DeploymentEnvironment = DeploymentEnvironment.Development
         @JvmStatic private var denoms : List<Int> = listOf(10000, 5000, 2000, 1000, 500, 200, 100)
         @JvmStatic private var usesNaturalChangeFunction : Boolean
-            get() { return SecurePreferences.getBooleanValue("usesNaturalChangeFunction", false) }
-            set(value) { SecurePreferences.setValue("usesNaturalChangeFunction", value) }
+            get() { return Credentials.sharedPrefs?.getBoolean("USES_NATURAL_CHANGE", false) ?: false }
+            set(value) {
+                val editor = Credentials.sharedPrefs?.edit()
+                editor?.putBoolean("USES_NATURAL_CHANGE", value)
+                editor?.apply()
+            }
 
         @JvmStatic fun bucketAmount(changeDueBack: Long): Long {
             var bucketAmount = changeDueBack
@@ -228,53 +227,50 @@ class Bucket {
 
             val url = environment.transaction(retailerId!!).build().toString()
 
-            AndroidNetworking.post(url)
+            val build = AndroidNetworking.post(url)
                     .setContentType("application/json; charset=UTF-8")
                     .addHeaders("x-functions-key", retailerSecret!!)
                     .addJSONObjectBody(jsonBody)
                     .build()
-                    .getAsJSONObject(object : JSONObjectRequestListener {
-                        override fun onResponse(response: JSONObject?) {
-                            this@Transaction.updateWith(response)
-                            callback?.transactionCreated()
-                        }
-                        override fun onError(anError: ANError?) {
-                            callback?.didError(anError?.bucketError)
-                        }
-                    })
+
+            build.getAsJSONObject(object : JSONObjectRequestListener {
+                override fun onResponse(response: JSONObject?) {
+                    this@Transaction.updateWith(response)
+                    callback?.transactionCreated()
+                }
+                override fun onError(anError: ANError?) {
+                    if (!anError.isNil) println(anError!!.errorBody)
+                    callback?.didError(anError?.bucketError)
+                }
+            })
         }
 
     }
 
     object Credentials {
-
+        @JvmStatic val sharedPrefs = appContext?.getSharedPreferences("SHAREDPREFS", Context.MODE_PRIVATE)
         @JvmStatic fun clientId(): String? {
             // The only thing hardcoded here is the /clientId.  This makes it so the hacker would need the actual device to read the clientId or clientSecret, which would mean we already have a security breach.
-            @SuppressLint("HardwareIds") var theKey = Settings.Secure.getString(appContext?.contentResolver, Settings.Secure.ANDROID_ID)
-            theKey += "/clientId"
-            return SecurePreferences.getStringValue(theKey, null)
-
+            return sharedPrefs?.getString("RETAILER_ID", null)
         }
 
         @JvmStatic fun setClientId(value: String) {
             // The only thing hardcoded here is the /clientId.  This makes it so the hacker would need the actual device to read the clientId or clientSecret, which would mean we already have a security breach.
-            @SuppressLint("HardwareIds") var theKey = Settings.Secure.getString(appContext?.contentResolver, Settings.Secure.ANDROID_ID)
-            theKey += "/clientId"
-            SecurePreferences.setValue(theKey, value)
+            val editor = sharedPrefs?.edit()
+            editor?.putString("RETAILER_ID", value)
+            editor?.apply()
         }
 
         @JvmStatic fun clientSecret(): String? {
             // The only thing hardcoded here is the /clientSecret.  This makes it so the hacker would need the actual device to read the clientId or clientSecret, which would mean we already have a security breach.
-            @SuppressLint("HardwareIds") var theKey = Settings.Secure.getString(appContext?.contentResolver, Settings.Secure.ANDROID_ID)
-            theKey += "/clientSecret"
-            return SecurePreferences.getStringValue(theKey, null)
+            return sharedPrefs?.getString("RETAILER_SECRET", null)
         }
 
         @JvmStatic fun setClientSecret(value: String) {
             // The only thing hardcoded here is the /clientSecret.  This makes it so the hacker would need the actual device to read the clientId or clientSecret, which would mean we already have a security breach.
-            @SuppressLint("HardwareIds") var theKey = Settings.Secure.getString(appContext?.contentResolver, Settings.Secure.ANDROID_ID)
-            theKey += "/clientSecret"
-            SecurePreferences.setValue(theKey, value)
+            val editor = sharedPrefs?.edit()
+            editor?.putString("RETAILER_SECRET", value)
+            editor?.apply()
         }
 
     }
@@ -335,7 +331,7 @@ var Any?.isNil : Boolean
 var ANError?.bucketError : Bucket.Error?
     get() {
         if (this.isNil) return null
-
+        println(this!!.errorCode)
         val code = this!!.errorCode
         if (code == 401) return Bucket.Error.unauthorized
         else if (code == 400) {
