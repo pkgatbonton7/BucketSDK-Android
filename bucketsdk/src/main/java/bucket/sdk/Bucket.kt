@@ -22,7 +22,7 @@ class Bucket {
     companion object {
 
         @JvmStatic private var tz : TimeZone = TimeZone.getTimeZone("UTC")
-        @JvmStatic private var df : DateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        @JvmStatic private var df : SimpleDateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
             get() {
                 if (field.timeZone != tz) field.timeZone = tz
                 return field
