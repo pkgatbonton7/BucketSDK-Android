@@ -232,7 +232,6 @@ class Bucket {
                     .setContentType("application/json; charset=UTF-8")
                     .addHeaders("x-functions-key", retailerSecret!!)
                     .addJSONObjectBody(jsonBody)
-                    .setPriority(Priority.HIGH)
                     .build()
                     .getAsJSONObject(object : JSONObjectRequestListener {
                         override fun onResponse(response: JSONObject?) {

@@ -4,7 +4,9 @@ import android.content.Context;
 import android.net.Uri;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Log;
 
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -24,6 +26,24 @@ public class ExampleInstrumentedTest {
         Context appContext = InstrumentationRegistry.getTargetContext();
 
         assertEquals("bucket.sdk", appContext.getPackageName());
+    }
+
+    @Test public void testCreateTransaction() {
+
+        Bucket.setAppContext(InstrumentationRegistry.getTargetContext());
+        Bucket.Transaction trans = new Bucket.Transaction(78, "MyClientTransId");
+
+        trans.create(new Bucket.Callbacks.CreateTransaction() {
+            @Override public void transactionCreated() {
+                assertTrue(true);
+            }
+            @Override public void didError(@Nullable Bucket.Error error) {
+                if (error != null) {
+                    Log.d("Error", error.getMessage());
+                }
+                assertFalse(false);
+            }
+        });
     }
 
 }
