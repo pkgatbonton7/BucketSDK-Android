@@ -229,7 +229,7 @@ class Bucket {
             val url = environment.transaction(retailerId!!).build().toString()
 
             AndroidNetworking.post(url)
-                    .addHeaders("Content-Type", "application/json; charset=UTF-8")
+                    .setContentType("application/json; charset=UTF-8")
                     .addHeaders("x-functions-key", retailerSecret!!)
                     .addJSONObjectBody(jsonBody)
                     .setPriority(Priority.HIGH)
