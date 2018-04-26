@@ -47,22 +47,25 @@ public class ExampleInstrumentedTest {
         assertEquals(retailerSecret, Bucket.Credentials.clientSecret());
     }
 
-//    @Test public void testCreateTransaction() {
-//
-//        Bucket.setAppContext(InstrumentationRegistry.getTargetContext());
-//        Bucket.Transaction trans = new Bucket.Transaction(78, "MyClientTransId");
-//
-//        trans.create(new Bucket.Callbacks.CreateTransaction() {
-//            @Override public void transactionCreated() {
-//                assertTrue(true);
-//            }
-//            @Override public void didError(@Nullable Bucket.Error error) {
-//                if (error != null) {
-//                    Log.d("Error", String.valueOf(error.getCode()));
-//                }
-//                fail();
-//            }
-//        });
-//    }
+    @Test
+    public void testCreateTransaction() {
+
+        Bucket.setAppContext(InstrumentationRegistry.getTargetContext());
+
+        Bucket.Credentials.setClientSecret("9IlwMxfQLaOvC4R64GdX/xabpvAA4QBpqb1t8lJ7PTGeR4daLI/bxw==");
+        Bucket.Credentials.setClientId("6644211a-c02a-4413-b307-04a11b16e6a4");
+
+        Bucket.Transaction trans = new Bucket.Transaction(78, "MyClientTransId");
+
+        trans.create(new Bucket.Callbacks.CreateTransaction() {
+            @Override public void transactionCreated() {
+                assertTrue(true);
+            }
+            @Override public void didError(@Nullable Bucket.Error error) {
+
+                fail();
+            }
+        });
+    }
 
 }

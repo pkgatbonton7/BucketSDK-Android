@@ -239,7 +239,6 @@ class Bucket {
                     callback?.transactionCreated()
                 }
                 override fun onError(anError: ANError?) {
-                    if (!anError.isNil) println(anError!!.errorBody)
                     callback?.didError(anError?.bucketError)
                 }
             })
