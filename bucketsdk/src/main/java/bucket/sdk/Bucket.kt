@@ -63,8 +63,8 @@ class Bucket {
         @JvmStatic fun close(interval: String, callback: Callbacks.CloseInterval?) {
 
             // Get the client id & client secret for this retailer:
-            val retailerId = Credentials.clientId()
-            val retailerSecret = Credentials.clientSecret()
+            val retailerId = Credentials.retailerId()
+            val retailerSecret = Credentials.retailerSecret()
 
             var shouldIReturn = false
             if (retailerId.isNullOrEmpty() || retailerSecret.isNullOrEmpty()) {
@@ -212,8 +212,8 @@ class Bucket {
         fun create(callback: Callbacks.CreateTransaction?) {
 
             // Get the client id & client secret for this retailer:
-            val retailerId = Credentials.clientId()
-            val retailerSecret = Credentials.clientSecret()
+            val retailerId = Credentials.retailerId()
+            val retailerSecret = Credentials.retailerSecret()
 
             var shouldIReturn = false
             if (retailerId.isNullOrEmpty() || retailerSecret.isNullOrEmpty()) {
@@ -248,24 +248,24 @@ class Bucket {
 
     object Credentials {
         @JvmStatic val sharedPrefs = appContext?.getSharedPreferences("SHAREDPREFS", Context.MODE_PRIVATE)
-        @JvmStatic fun clientId(): String? {
+        @JvmStatic fun retailerId(): String? {
             // The only thing hardcoded here is the /clientId.  This makes it so the hacker would need the actual device to read the clientId or clientSecret, which would mean we already have a security breach.
             return sharedPrefs?.getString("RETAILER_ID", null)
         }
 
-        @JvmStatic fun setClientId(value: String) {
+        @JvmStatic fun setRetailerId(value: String) {
             // The only thing hardcoded here is the /clientId.  This makes it so the hacker would need the actual device to read the clientId or clientSecret, which would mean we already have a security breach.
             val editor = sharedPrefs?.edit()
             editor?.putString("RETAILER_ID", value)
             editor?.apply()
         }
 
-        @JvmStatic fun clientSecret(): String? {
+        @JvmStatic fun retailerSecret(): String? {
             // The only thing hardcoded here is the /clientSecret.  This makes it so the hacker would need the actual device to read the clientId or clientSecret, which would mean we already have a security breach.
             return sharedPrefs?.getString("RETAILER_SECRET", null)
         }
 
-        @JvmStatic fun setClientSecret(value: String) {
+        @JvmStatic fun setRetailerSecret(value: String) {
             // The only thing hardcoded here is the /clientSecret.  This makes it so the hacker would need the actual device to read the clientId or clientSecret, which would mean we already have a security breach.
             val editor = sharedPrefs?.edit()
             editor?.putString("RETAILER_SECRET", value)
@@ -331,7 +331,7 @@ var ANError?.bucketError : Bucket.Error?
     get() {
         if (this.isNil) return null
         println(this!!.errorCode)
-        val code = this!!.errorCode
+        val code = this.errorCode
         if (code == 401) return Bucket.Error.unauthorized
         else if (code == 400) {
             val json = JSONObject(this.errorBody)

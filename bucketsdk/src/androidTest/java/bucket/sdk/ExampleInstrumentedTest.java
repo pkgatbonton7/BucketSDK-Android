@@ -27,46 +27,46 @@ public class ExampleInstrumentedTest {
         assertEquals("bucket.sdk", appContext.getPackageName());
     }
 
-    @Test
-    public void testSettingClientId() {
-        Bucket.setAppContext(InstrumentationRegistry.getTargetContext());
+//    @Test
+//    public void testSettingClientId() {
+//        Bucket.setAppContext(InstrumentationRegistry.getTargetContext());
+//
+//        String retailerId = "RandomRetailerId";
+//        Bucket.Credentials.setClientId(retailerId);
+//        assertEquals(retailerId, Bucket.Credentials.clientId());
+//
+//    }
 
-        String retailerId = "RandomRetailerId";
-        Bucket.Credentials.setClientId(retailerId);
-        assertEquals(retailerId, Bucket.Credentials.clientId());
+//    @Test
+//    public void testSettingClientSecret() {
+//        Bucket.setAppContext(InstrumentationRegistry.getTargetContext());
+//
+//        String retailerSecret = "RandomClientSecret";
+//        Bucket.Credentials.setClientSecret(retailerSecret);
+//        assertEquals(retailerSecret, Bucket.Credentials.clientSecret());
+//    }
 
-    }
-
-    @Test
-    public void testSettingClientSecret() {
-        Bucket.setAppContext(InstrumentationRegistry.getTargetContext());
-
-        String retailerSecret = "RandomClientSecret";
-        Bucket.Credentials.setClientSecret(retailerSecret);
-        assertEquals(retailerSecret, Bucket.Credentials.clientSecret());
-    }
-
-    @Test
-    public void testCreateTransaction() {
-
-        Bucket.setAppContext(InstrumentationRegistry.getTargetContext());
-
-        Bucket.Credentials.setClientSecret("9IlwMxfQLaOvC4R64GdX/xabpvAA4QBpqb1t8lJ7PTGeR4daLI/bxw==");
-        Bucket.Credentials.setClientId("6644211a-c02a-4413-b307-04a11b16e6a4");
-
-        Bucket.Transaction trans = new Bucket.Transaction(78, "MyClientTransId");
-
-        Log.d("BUCKET",String.valueOf(Bucket.getEnvironment()));
-
-        trans.create(new Bucket.Callbacks.CreateTransaction() {
-            @Override public void transactionCreated() {
-                assertTrue(true);
-            }
-            @Override public void didError(@Nullable Bucket.Error error) {
-
-                fail();
-            }
-        });
-    }
+//    @Test
+//    public void testCreateTransaction() {
+//
+//        Bucket.setAppContext(InstrumentationRegistry.getTargetContext());
+//
+//        Bucket.Credentials.setClientSecret("9IlwMxfQLaOvC4R64GdX/xabpvAA4QBpqb1t8lJ7PTGeR4daLI/bxw==");
+//        Bucket.Credentials.setClientId("6644211a-c02a-4413-b307-04a11b16e6a4");
+//
+//        Bucket.Transaction trans = new Bucket.Transaction(78, "MyClientTransId");
+//
+//        Log.d("BUCKET",String.valueOf(Bucket.getEnvironment()));
+//
+//        trans.create(new Bucket.Callbacks.CreateTransaction() {
+//            @Override public void transactionCreated() {
+//                assertTrue(true);
+//            }
+//            @Override public void didError(@Nullable Bucket.Error error) {
+//
+//                fail();
+//            }
+//        });
+//    }
 
 }
