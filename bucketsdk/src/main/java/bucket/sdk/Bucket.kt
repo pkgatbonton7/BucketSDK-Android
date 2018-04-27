@@ -152,10 +152,10 @@ class Bucket {
         }
     }
 
-    class Error(var message: String?, var code : Int?) {
+    class Error(var message: String?, var detail : String?, var code : Int?) {
         companion object {
-            @JvmStatic val unauthorized : Bucket.Error = Error("Unauthorized", 401)
-            @JvmStatic val unsupportedMethod : Bucket.Error = Bucket.Error("Unsupported API function.", null)
+            @JvmStatic val unauthorized : Bucket.Error = Error("Unauthorized", "Check your retailer id & retailer secret", 401)
+            @JvmStatic val unsupportedMethod : Bucket.Error = Bucket.Error("Unsupported API function.", "THE_METHOD", null)
         }
     }
 
@@ -335,8 +335,10 @@ var ANError?.bucketError : Bucket.Error?
         if (code == 401) return Bucket.Error.unauthorized
         else if (code == 400) {
             val json = JSONObject(this.errorBody)
-            return Bucket.Error(json.getString("message"), code)
+            val message = json.getString("message")
+            return Bucket.Error(message, message, code)
+        } else {
+            return Bucket.Error(this.errorBody, this.errorDetail, this.errorCode)
         }
-        return Bucket.Error("Unknown Error", code)
     }
     private set(value) {  }

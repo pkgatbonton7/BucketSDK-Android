@@ -3,6 +3,8 @@ package bucket.sdk;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Log;
+
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,6 +55,8 @@ public class ExampleInstrumentedTest {
         Bucket.Credentials.setClientId("6644211a-c02a-4413-b307-04a11b16e6a4");
 
         Bucket.Transaction trans = new Bucket.Transaction(78, "MyClientTransId");
+
+        Log.d("BUCKET",String.valueOf(Bucket.getEnvironment()));
 
         trans.create(new Bucket.Callbacks.CreateTransaction() {
             @Override public void transactionCreated() {
