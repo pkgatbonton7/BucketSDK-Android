@@ -33,6 +33,29 @@ if (!BuildConfig.DEBUG) {
 Bucket.appContext = theAppContext
 ```
 
+### Setting & retrieving your retailer id & retailer secret:
+````Java
+// Java:
+// Setter:
+Bucket.Credentials.setRetailerId("RetailerId");
+Bucket.Credentials.setRetailerSecret("RetailerSecret");
+
+// Getter:
+String retailerId = Bucket.Credentials.retailerId();
+String retailerSecret = Bucket.Credentials.retailerSecret();
+````
+
+```kotlin
+// Kotlin:
+// Setter:
+Bucket.Credentials.setRetailerId("RetailerId")
+Bucket.Credentials.setRetailerSecret("RetailerSecret")
+
+// Getter:
+val retailerId = Bucket.Credentials.retailerId()
+val retailerSecret = Bucket.Credentials.retailerSecret()
+```
+
 ### Setting your currency code:
 SGD (Singapore) & USD (USA) currencies are currently supported.
 ```Java
