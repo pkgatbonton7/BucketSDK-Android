@@ -143,3 +143,8 @@ Bucket.close(interval, object : Bucket.Callbacks.CloseInterval() {
 ```
 
 ## Author
+Ryan Coyne, ryan@buckettechnologies.com
+
+## License
+
+BucketSDK is available under the MIT license. See the LICENSE file for more info.
