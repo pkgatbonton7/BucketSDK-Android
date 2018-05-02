@@ -86,10 +86,12 @@ Bucket.fetchBillDenominations("USD", object : Bucket.Callbacks.BillDenomination(
 ```Java
 // Java:
 long bucketAmount = Bucket.bucketAmount(789);
-
+```
+```kotlin
 // Kotlin:
 val bucketAmount = Bucket.bucketAmount(789)
 ```
+
 ### Creating a transaction
 You will need to use the bucketAmount function to set the transaction amount here.
 ```Java
