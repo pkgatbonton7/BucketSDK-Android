@@ -167,7 +167,7 @@ class Bucket {
         }
     }
 
-    class Transaction(var amount: Int, var clientTransactionId: String) {
+    class Transaction(var amount: Int, var clientTransactionId: String, var totalAmount: Int) {
 
         // This is the primary key for the transaction in our db, as annotated:
         @PrimaryKey var bucketTransactionId : String? = null
@@ -198,6 +198,7 @@ class Bucket {
             intervalId = df.format(Date())
             // We will always set the amount & clientTransactionId when sending the JSON:
             obj.put("amount", amount)
+            obj.put("totalTransactionAmount", totalAmount)
             obj.put("clientTransactionId", clientTransactionId)
             obj.put("intervalId", intervalId)
             obj.put("terminalId", terminalId)
