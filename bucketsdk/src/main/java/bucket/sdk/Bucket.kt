@@ -10,6 +10,8 @@ import java.util.*
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
+import com.androidnetworking.interfaces.OkHttpResponseAndJSONObjectRequestListener
+import okhttp3.Response
 import kotlin.collections.ArrayList
 
 class Bucket {
@@ -41,6 +43,51 @@ class Bucket {
                 editor?.putBoolean("USES_NATURAL_CHANGE", value)
                 editor?.apply()
             }
+
+        @JvmStatic fun registerDevice(callback: Callbacks.RegisterTerminal?) {
+
+            val theURL = environment.regTerminal().build().toString()
+            val terminalId = Build.SERIAL
+            val retailerId = Credentials.retailerId()
+
+            // If either of these are nil, we need to throw an error:
+            var jsonBody : JSONObject? = null
+            if (terminalId.isNil || retailerId.isNil) {
+                callback?.didError(Bucket.Error.invalidRetailer)
+            }
+
+            jsonBody = JSONObject()
+            jsonBody.put("terminalId", terminalId)
+            jsonBody.put("retailerId", retailerId!!)
+
+            AndroidNetworking.post(theURL)
+                    .addJSONObjectBody(jsonBody)
+                    .setContentType("application/json; charset=utf8")
+                    .build()
+                    .getAsOkHttpResponseAndJSONObject(object : OkHttpResponseAndJSONObjectRequestListener {
+                        override fun onResponse(okHttpResponse: Response?, response: JSONObject?) {
+                            // See if the device is approved or not:
+                            when (okHttpResponse?.code()) {
+                                200 -> {
+                                    val apiKey = response?.getString("apiKey")
+                                    if (!apiKey.isNil) {
+                                        Credentials.setRetailerSecret(apiKey!!)
+                                    }
+                                    callback?.deviceIsApproved()
+                                }
+                                201 -> {
+                                    callback?.deviceWasRegistered()
+                                }
+                                else -> {
+                                    callback?.didError(null)
+                                }
+                            }
+                        }
+                        override fun onError(anError: ANError?) {
+                            callback?.didError(anError?.bucketError)
+                        }
+                    })
+        }
 
         @JvmStatic fun bucketAmount(changeDueBack: Long): Long {
             var bucketAmount = changeDueBack
@@ -134,8 +181,9 @@ class Bucket {
 
     }
     class Callbacks {
-        abstract class RetailerLogin {
-            abstract fun didLogIn()
+        abstract class RegisterTerminal {
+            abstract fun deviceIsApproved()
+            abstract fun deviceWasRegistered()
             abstract fun didError(error: Bucket.Error?)
         }
         abstract class CreateTransaction {
@@ -156,12 +204,13 @@ class Bucket {
         companion object {
             @JvmStatic val unauthorized : Bucket.Error = Error("Unauthorized", "Check your retailer id & retailer secret", 401)
             @JvmStatic val unsupportedMethod : Bucket.Error = Bucket.Error("Unsupported API function.", "THE_METHOD", null)
+            @JvmStatic val invalidRetailer : Bucket.Error = Bucket.Error("Invalid Retailer Id", "Please Check Retailer Id and Secret Code", 401)
         }
     }
 
     class Retailer {
         companion object {
-            @JvmStatic fun logInWith(password: String, username: String, callback: Callbacks.RetailerLogin?) {
+            @JvmStatic fun logInWith(password: String, username: String, callback: Callbacks.RegisterTerminal?) {
                 callback?.didError(Error.unsupportedMethod)
             }
         }
@@ -311,8 +360,8 @@ class Bucket {
         fun closeInterval(clientId: String, intervalId : String): Uri.Builder {
             return bucketBaseUri().appendPath("closeInterval").appendPath(clientId).appendPath(intervalId)
         }
-        fun retailerLogin(): Uri.Builder {
-            return retailerBaseUri().appendPath("login")
+        fun regTerminal(): Uri.Builder {
+            return retailerBaseUri().appendPath("registerterminal")
         }
     }
 }
