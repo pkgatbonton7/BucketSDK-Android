@@ -62,7 +62,7 @@ class Bucket {
 
             AndroidNetworking.post(theURL)
                     .addJSONObjectBody(jsonBody)
-                    .setContentType("application/json; charset=utf8")
+                    .setContentType("application/json; charset=UTF-8")
                     .build()
                     .getAsOkHttpResponseAndJSONObject(object : OkHttpResponseAndJSONObjectRequestListener {
                         override fun onResponse(okHttpResponse: Response?, response: JSONObject?) {
@@ -361,7 +361,7 @@ class Bucket {
             return bucketBaseUri().appendPath("closeInterval").appendPath(clientId).appendPath(intervalId)
         }
         fun regTerminal(): Uri.Builder {
-            return retailerBaseUri().appendPath("registerterminal")
+            return bucketBaseUri().appendPath("registerterminal")
         }
     }
 }
