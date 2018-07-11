@@ -27,15 +27,54 @@ public class ExampleInstrumentedTest {
         assertEquals("bucket.sdk", appContext.getPackageName());
     }
 
-//    @Test
-//    public void testSettingClientId() {
-//        Bucket.setAppContext(InstrumentationRegistry.getTargetContext());
-//
-//        String retailerId = "RandomRetailerId";
-//        Bucket.Credentials.setClientId(retailerId);
-//        assertEquals(retailerId, Bucket.Credentials.clientId());
-//
-//    }
+    @Test
+    public void testCreatingTransaction() {
+        Bucket.setAppContext(InstrumentationRegistry.getTargetContext());
+
+        Bucket.Credentials.setRetailerId("");
+        Bucket.Credentials.setRetailerSecret("");
+
+        Bucket.Transaction trans = new Bucket.Transaction(77, "randomIid", 723);
+        trans.create(new Bucket.Callbacks.CreateTransaction() {
+            @Override
+            public void transactionCreated() {
+                assertTrue(true);
+            }
+
+            @Override
+            public void didError(@Nullable Bucket.Error error) {
+                assertFalse(true);
+            }
+        });
+
+    }
+
+    @Test
+    public void testRegisterDevice() {
+        Bucket.setAppContext(InstrumentationRegistry.getTargetContext());
+
+        Bucket.Credentials.setRetailerId("6644211a-c02a-4413-b307-04a11b16e6a4");
+
+        Bucket.registerDevice(new Bucket.Callbacks.RegisterTerminal() {
+            @Override
+            public void deviceIsApproved() {
+                assertTrue(true);
+            }
+            @Override
+            public void deviceWasRegistered() {
+                assertTrue(true);
+            }
+            @Override
+            public void didError(@Nullable Bucket.Error error) {
+                if (error != null) {
+                    Log.d("Error", error.getMessage());
+                }
+
+                assertFalse(false);
+            }
+        });
+
+    }
 
 //    @Test
 //    public void testSettingClientSecret() {
