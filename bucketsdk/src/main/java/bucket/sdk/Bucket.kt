@@ -3,6 +3,7 @@ package bucket.sdk
 import android.content.Context
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import org.json.JSONObject
 import java.net.URL
 import java.text.SimpleDateFormat
@@ -380,7 +381,7 @@ var Any?.isNil : Boolean
 var ANError?.bucketError : Bucket.Error?
     get() {
         if (this.isNil) return null
-        println(this!!.errorCode)
+        Log.d("BUCKET ERROR", "${this!!.errorCode}")
         val code = this.errorCode
         return when (code) {
             401 -> Bucket.Error.unauthorized
@@ -388,6 +389,7 @@ var ANError?.bucketError : Bucket.Error?
                 if (this.errorBody.isNotEmpty()) {
                     val json = JSONObject(this.errorBody)
                     val message = json.getString("message")
+
                     Bucket.Error(message, message, code)
                 } else {
                     Bucket.Error(this.errorBody, this.errorDetail, this.errorCode)
