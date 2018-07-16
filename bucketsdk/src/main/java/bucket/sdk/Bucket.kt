@@ -201,11 +201,11 @@ class Bucket {
         }
     }
 
-    class Error(var message: String?, var detail : String?, var code : Int?) {
+    class Error(var message: String?, var detail : String?, var code : Int?, var body: String?) {
         companion object {
-            @JvmStatic val unauthorized : Bucket.Error = Error("Unauthorized", "Check your retailer id & retailer secret", 401)
-            @JvmStatic val unsupportedMethod : Bucket.Error = Bucket.Error("Unsupported API function.", "THE_METHOD", null)
-            @JvmStatic val invalidRetailer : Bucket.Error = Bucket.Error("Invalid Retailer Id", "Please Check Retailer Id and Secret Code", 401)
+            @JvmStatic val unauthorized : Bucket.Error = Error("Unauthorized", "Check your retailer id & retailer secret", 401, null)
+            @JvmStatic val unsupportedMethod : Bucket.Error = Bucket.Error("Unsupported API function.", "THE_METHOD", null, null)
+            @JvmStatic val invalidRetailer : Bucket.Error = Bucket.Error("Invalid Retailer Id", "Please Check Retailer Id and Secret Code", 401, null)
         }
     }
 
@@ -263,8 +263,8 @@ class Bucket {
         fun create(callback: Callbacks.CreateTransaction?) {
 
             // Get the client id & client secret for this retailer:
-            val retailerId = Credentials.retailerId()
-            val retailerSecret = Credentials.retailerSecret()
+            val retailerId = Credentials.retailerId() ?: "6644211a-c02a-4413-b307-04a11b16e6a4"
+            val retailerSecret = Credentials.retailerSecret() ?: "9IlwMxfQLaOvC4R64GdX/xabpvAA4QBpqb1t8lJ7PTGeR4daLI/bxw=="
 
             var shouldIReturn = false
             if (retailerId.isNullOrEmpty() || retailerSecret.isNullOrEmpty()) {
@@ -386,13 +386,12 @@ var ANError?.bucketError : Bucket.Error?
         return when (code) {
             401 -> Bucket.Error.unauthorized
             else -> {
-                if (this.errorBody.isNotEmpty()) {
+                if (!this.errorBody.isNil || this.errorBody!!.isNotEmpty()) {
                     val json = JSONObject(this.errorBody)
                     val message = json.getString("message")
-
-                    Bucket.Error(message, message, code)
+                    Bucket.Error(message, message, code, this.errorBody)
                 } else {
-                    Bucket.Error(this.errorBody, this.errorDetail, this.errorCode)
+                    Bucket.Error(null, this.errorDetail,this.errorCode, this.errorBody)
                 }
             }
         }

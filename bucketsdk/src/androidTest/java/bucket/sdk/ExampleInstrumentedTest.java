@@ -50,6 +50,22 @@ public class ExampleInstrumentedTest {
     }
 
     @Test
+    public void testCreateTransaction() {
+
+        Context appContext = InstrumentationRegistry.getTargetContext();
+        Bucket.setAppContext(appContext);
+        Bucket.Transaction trans = new Bucket.Transaction(0, "lll", 700);
+        trans.create(new Bucket.Callbacks.CreateTransaction() {
+            @Override public void transactionCreated() {
+                Log.e("","");
+            }
+            @Override public void didError(@Nullable Bucket.Error error) {
+                Log.e("","");
+            }
+        });
+    }
+
+    @Test
     public void testRegisterDevice() {
         Bucket.setAppContext(InstrumentationRegistry.getTargetContext());
 
