@@ -378,6 +378,10 @@ var Any?.isNil : Boolean
     get() { return this == null }
     private set(value) {}
 
+//var String?.isEmptyOrNil : Boolean
+//    get() { return this == null }
+//    private set(value) {}
+
 var ANError?.bucketError : Bucket.Error?
     get() {
         if (this.isNil) return null
@@ -386,12 +390,12 @@ var ANError?.bucketError : Bucket.Error?
         return when (code) {
             401 -> Bucket.Error.unauthorized
             else -> {
-                if (!this.errorBody.isNil && this.errorBody!!.isNotEmpty()) {
+                if (this.errorBody.isNullOrEmpty()) {
+                    Bucket.Error(null, this.errorDetail,this.errorCode, null)
+                } else {
                     val json = JSONObject(this.errorBody)
                     val message = json.getString("message")
                     Bucket.Error(message, message, code, this.errorBody)
-                } else {
-                    Bucket.Error(null, this.errorDetail,this.errorCode, this.errorBody)
                 }
             }
         }

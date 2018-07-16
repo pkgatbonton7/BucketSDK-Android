@@ -31,19 +31,18 @@ public class ExampleInstrumentedTest {
     public void testCreatingTransaction() {
         Bucket.setAppContext(InstrumentationRegistry.getTargetContext());
 
-        Bucket.Credentials.setRetailerId("");
-        Bucket.Credentials.setRetailerSecret("");
-
-        Bucket.Transaction trans = new Bucket.Transaction(77, "randomIid", 723);
+        Bucket.Credentials.setRetailerSecret("9IlwMxfQLaOvC4R64GdX/xabpvAA4QBpqb1t8lJ7PTGeR4daLI/bxw==");
+        Bucket.Credentials.setRetailerId("6644211a-c02a-4413-b307-04a11b16e6a4");
+        Bucket.Transaction trans = new Bucket.Transaction(0, "lll", 700);
         trans.create(new Bucket.Callbacks.CreateTransaction() {
             @Override
             public void transactionCreated() {
-                assertTrue(true);
+                Log.e("","");
             }
 
             @Override
-            public void didError(@Nullable Bucket.Error error) {
-                assertFalse(true);
+            public void didError(Bucket.Error error) {
+                Log.e("","");
             }
         });
 
