@@ -263,8 +263,8 @@ class Bucket {
         fun create(callback: Callbacks.CreateTransaction?) {
 
             // Get the client id & client secret for this retailer:
-            val retailerId = Credentials.retailerId() ?: "6644211a-c02a-4413-b307-04a11b16e6a4"
-            val retailerSecret = Credentials.retailerSecret() ?: "9IlwMxfQLaOvC4R64GdX/xabpvAA4QBpqb1t8lJ7PTGeR4daLI/bxw=="
+            val retailerId = Credentials.retailerId()
+            val retailerSecret = Credentials.retailerSecret()
 
             var shouldIReturn = false
             if (retailerId.isNullOrEmpty() || retailerSecret.isNullOrEmpty()) {
@@ -386,7 +386,7 @@ var ANError?.bucketError : Bucket.Error?
         return when (code) {
             401 -> Bucket.Error.unauthorized
             else -> {
-                if (!this.errorBody.isNil || this.errorBody!!.isNotEmpty()) {
+                if (!this.errorBody.isNil && this.errorBody!!.isNotEmpty()) {
                     val json = JSONObject(this.errorBody)
                     val message = json.getString("message")
                     Bucket.Error(message, message, code, this.errorBody)
