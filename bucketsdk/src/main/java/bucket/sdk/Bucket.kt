@@ -382,13 +382,17 @@ var ANError?.bucketError : Bucket.Error?
         if (this.isNil) return null
         println(this!!.errorCode)
         val code = this.errorCode
-        if (code == 401) return Bucket.Error.unauthorized
-        else if (code == 400) {
-            val json = JSONObject(this.errorBody)
-            val message = json.getString("message")
-            return Bucket.Error(message, message, code)
-        } else {
-            return Bucket.Error(this.errorBody, this.errorDetail, this.errorCode)
+        return when (code) {
+            401 -> Bucket.Error.unauthorized
+            else -> {
+                if (this.errorBody.isNotEmpty()) {
+                    val json = JSONObject(this.errorBody)
+                    val message = json.getString("message")
+                    Bucket.Error(message, message, code)
+                } else {
+                    Bucket.Error(this.errorBody, this.errorDetail, this.errorCode)
+                }
+            }
         }
     }
     private set(value) {  }
