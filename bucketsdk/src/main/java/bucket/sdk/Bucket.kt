@@ -240,7 +240,7 @@ class Bucket {
 
         }
 
-        private fun toJSON(): JSONObject {
+        internal fun toJSON(): JSONObject {
 
             val obj = JSONObject()
 
@@ -391,11 +391,13 @@ var ANError?.bucketError : Bucket.Error?
             401 -> Bucket.Error.unauthorized
             else -> {
                 if (this.errorBody.isNullOrEmpty()) {
-                    Bucket.Error(null, this.errorDetail,this.errorCode, null)
-                } else {
+                    Bucket.Error(null, this.errorDetail, code, null)
+                } else if (this.errorBody.isEmpty()) {
                     val json = JSONObject(this.errorBody)
                     val message = json.getString("message")
                     Bucket.Error(message, message, code, this.errorBody)
+                } else {
+                    null
                 }
             }
         }
