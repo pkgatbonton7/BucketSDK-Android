@@ -4,6 +4,7 @@ package bucket.sdk
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
 import bucket.sdk.callbacks.CreateTransaction
+import bucket.sdk.callbacks.DeleteTransaction
 import bucket.sdk.callbacks.RegisterTerminal
 import bucket.sdk.models.Error
 import bucket.sdk.models.Transaction
@@ -60,6 +61,24 @@ class ExampleInstrumentedTest {
         Thread.sleep(5000)
     }
 
+    @Test fun testDeleteTransaction() {
+
+        Bucket.appContext = InstrumentationRegistry.getTargetContext()
+
+        val transaction = Transaction(0.54, 7.89, "RandomTransactionId")
+        transaction.customerCode = "us.eDZ9LBdvununS"
+
+        transaction.delete("us", object : DeleteTransaction {
+            override fun transactionDeleted() {
+                assert(true)
+            }
+            override fun didError(error: Error?) {
+                assertTrue(error?.message ?: "", false)
+            }
+        })
+
+        Thread.sleep(5000)
+    }
 
 //    fun testCreatingTransaction() {
 //        Bucket.appContext = InstrumentationRegistry.getTargetContext()
