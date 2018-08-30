@@ -3,8 +3,10 @@ package bucket.sdk
 import android.content.Context
 import android.os.Build
 import bucket.sdk.callbacks.*
+import bucket.sdk.extensions.bucketError
 import bucket.sdk.models.Error
 import com.github.kittinunf.fuel.android.extension.responseJson
+import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
 import org.json.JSONObject
@@ -49,6 +51,32 @@ class Bucket {
         @JvmStatic fun fetchBillDenominations(countryCode: String, callback: BillDenomination?) {
 
             val theURL = environment.billDenoms.build().toString()
+
+            theURL.httpGet().header(Pair("countryId", countryCode)).responseJson {
+                request, response, result ->
+
+                when (result) {
+                    is Result.Success -> {
+                        val response = result.value.obj()
+                        val denominations = response.getJSONArray("denominations")
+                        usesNaturalChangeFunction = response.getBoolean("usesNaturalChangeFunction") ?: false
+                        denominations?.let {
+                            // Create our list of denominations:
+                            val theDenoms : MutableList<Double> = ArrayList()
+                            for (i in 0..(it.length()-1)) {
+                                theDenoms[i] = it.getDouble(i)
+                            }
+                            Bucket.denoms = theDenoms
+                        }
+                        callback?.setBillDenoms()
+                    }
+                    is Result.Failure -> {
+                        val error = response.bucketError
+                        callback?.didError(error)
+                    }
+                }
+
+            }
 //            AndroidNetworking.get(theURL)
 //                    .addHeaders("countryId",countryCode)
 //                    .build().getAsJSONObject(object : JSONObjectRequestListener {
@@ -83,7 +111,9 @@ class Bucket {
 
             val theURL = environment.registerTerminal.build().toString()
 
-            theURL.httpPost().body(json.toString()).header(Pair("retailerId",retailerCode!!)).header(Pair("countryId", countryCode)).responseJson { request, response, result ->
+            theURL.httpPost().body(json.toString()).header(Pair("retailerId",retailerCode!!)).header(Pair("countryId", countryCode)).responseJson {
+                request, response, result ->
+
                 when (result) {
                     is Result.Failure -> {
                         val code = response.statusCode
