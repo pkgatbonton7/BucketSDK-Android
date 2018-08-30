@@ -16,8 +16,7 @@ import java.net.URL
 class Transaction(var amount: Double, var totalTransactionAmount : Double, var clientTransactionId: String) {
 
     // This is the primary key for the transaction in our db, as annotated:
-    @PrimaryKey
-    var bucketTransactionId : String? = null
+    @PrimaryKey var bucketTransactionId : Int? = null
     var customerCode                    : String?  = null
     var qrCodeContent                   : URL? = null
 
@@ -30,7 +29,8 @@ class Transaction(var amount: Double, var totalTransactionAmount : Double, var c
         if (updateJSON.isNil) return
 
         this.customerCode = updateJSON!!.optString("customerCode", null)
-        this.bucketTransactionId = updateJSON.optString("bucketTransactionId", null)
+        this.locationId = updateJSON.optString("locationId", null)
+        this.bucketTransactionId = updateJSON.optInt("bucketTransactionId", 0)
         this.qrCodeContent = updateJSON.getURL("qrCodeContent")
         this.totalTransactionAmount = updateJSON.optDouble("totalTransactionAmount", 0.0)
     }

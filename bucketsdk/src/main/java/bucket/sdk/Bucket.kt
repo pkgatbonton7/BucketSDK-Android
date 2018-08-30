@@ -49,14 +49,14 @@ class Bucket {
 
             val theURL = environment.billDenoms.build().toString()
 
-            theURL.httpGet().header(Pair("countryId", countryCode)).responseJson {
+            theURL.httpPost().header(Pair("countryId", countryCode)).responseJson {
                 request, response, result ->
 
                 when (result) {
                     is Result.Success -> {
                         val response = result.value.obj()
-                        val denominations = response.getJSONArray("denominations")
-                        usesNaturalChangeFunction = response.getBoolean("usesNaturalChangeFunction") ?: false
+                        val denominations = response.optJSONArray("denominations")
+                        usesNaturalChangeFunction = response.optBoolean("usesNaturalChangeFunction", false)
                         denominations?.let {
                             // Create our list of denominations:
                             val theDenoms : MutableList<Double> = ArrayList()
