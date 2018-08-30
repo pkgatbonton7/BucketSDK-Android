@@ -34,7 +34,7 @@ class ExampleInstrumentedTest {
         AndroidNetworking.initialize(Bucket.appContext)
         Credentials.setRetailerCode("BCKT-1")
         // Get the client id & client secret for this retailer:
-        Bucket.registerTerminal("us", object : RegisterTerminal() {
+        Bucket.registerTerminal("us", object : RegisterTerminal {
             override fun success(isApproved: Boolean) {
                 assert(true)
             }
