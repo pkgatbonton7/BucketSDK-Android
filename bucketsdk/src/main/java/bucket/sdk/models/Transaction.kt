@@ -35,7 +35,7 @@ class Transaction(var amount: Double, var totalTransactionAmount : Double, var c
         this.totalTransactionAmount = updateJSON.getDouble("totalTransactionAmount")
     }
 
-    private fun toJSON(): JSONObject {
+    internal fun toJSON(): JSONObject {
 
         val obj = JSONObject()
 

@@ -5,7 +5,6 @@ import android.os.Build
 import bucket.sdk.callbacks.*
 import bucket.sdk.extensions.*
 import org.json.JSONObject
-import java.text.SimpleDateFormat
 import java.util.*
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.error.ANError
