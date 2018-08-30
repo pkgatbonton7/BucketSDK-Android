@@ -99,7 +99,12 @@ class ExampleInstrumentedTest {
 
     @Test fun bucketAmount() {
 
+        // Make sure the bucket amount function is working:
+        Bucket.appContext = InstrumentationRegistry.getTargetContext()
 
+        val bucketAmount = Bucket.bucketAmount(7.69)
+
+        assertTrue(bucketAmount == 0.69)
 
     }
 }
