@@ -1,6 +1,7 @@
 package bucket.sdk
 
 import android.content.Context
+import android.os.Build
 import bucket.sdk.callbacks.*
 import bucket.sdk.extensions.*
 import org.json.JSONObject
@@ -16,11 +17,6 @@ class Bucket {
     companion object {
 
         @JvmStatic internal var tz : TimeZone = TimeZone.getTimeZone("UTC")
-        @JvmStatic internal var df : SimpleDateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
-            get() {
-                if (field.timeZone != tz) field.timeZone = tz
-                return field
-            }
 
         @JvmStatic var appContext : Context? = null
             set(value) {
@@ -61,35 +57,23 @@ class Bucket {
 
         @JvmStatic fun fetchBillDenominations(countryCode: String, callback: BillDenomination?) {
 
-            // TODO:  We need an endpoint to return the natural change denominations for the country.
-
-//            var theURL = environment.billDenoms(retailerId,)
-            AndroidNetworking.get("https://bucketresources.blob.core.windows.net/static/Currencies.json")
+            val theURL = environment.billDenoms.build().toString()
+            AndroidNetworking.get(theURL)
+                    .addHeaders("countryId",countryCode)
                     .build().getAsJSONObject(object : JSONObjectRequestListener {
                         override fun onResponse(response: JSONObject?) {
                             // Deal with the data:
-                            val denoms = response?.getJSONArray("currencies")
+                            val denoms = response?.getJSONArray("denominations")
+                            usesNaturalChangeFunction = response?.getBoolean("usesNaturalChangeFunction") ?: false
                             denoms?.let {
+                                // Create our list of denominations:
+                                val theDenoms : MutableList<Double> = ArrayList()
                                 for (i in 0..(it.length()-1)) {
-
-                                    val json = it.getJSONObject(i)
-
-                                    if (json.getString("currencyCode") != countryCode) continue
-                                    // Okay we are good to process.. Lets check if we need to set this for the natural change function:
-                                    if (json.getBoolean("useNaturalChangeFunction")) {
-                                        usesNaturalChangeFunction = true
-                                        val theds = json.getJSONArray("commonDenominations")
-                                        val theDenoms:MutableList<Double> = ArrayList()
-                                        for (j in 0..(theds.length()-1)) {
-                                            theDenoms.add(j, theds.getDouble(j))
-                                        }
-                                        // Now set the denominations:
-                                        Bucket.denoms = theDenoms
-                                    } else usesNaturalChangeFunction = false
-                                    // Let our interface know we finished processing:
-                                    callback?.setBillDenoms()
+                                    theDenoms[i] = it.getDouble(i)
                                 }
+                                Bucket.denoms = theDenoms
                             }
+                            callback?.setBillDenoms()
                         }
                         override fun onError(anError: ANError?) {
                             callback?.didError(anError.bucketError)
@@ -97,5 +81,35 @@ class Bucket {
                     })
         }
 
+        @JvmStatic fun registerTerminal(countryCode: String, callback: RegisterTerminal?) {
+
+            val retailerCode = Credentials.retailerCode()
+
+            val terminalId = Build.SERIAL
+
+            val json = JSONObject()
+            json.put("terminalId", terminalId)
+
+            val theURL = environment.registerTerminal.build().toString()
+            AndroidNetworking.post(theURL)
+                    .addJSONObjectBody(json)
+                    .addHeaders("countryId",countryCode)
+                    .addHeaders("retailerId", retailerCode!!)
+                    .build()
+                    .getAsJSONObject(object : JSONObjectRequestListener {
+                        override fun onResponse(response: JSONObject?) {
+                            // Deal with the data:
+                            val isApproved = response?.getBoolean("isActivated") ?: false
+                            val terminalSecret = response?.getString("apiKey")
+                            callback?.success(isApproved)
+
+                            // Write the terminal Api Key:
+                            Credentials.setTerminalSecret(terminalSecret)
+                        }
+                        override fun onError(anError: ANError?) {
+                            callback?.didError(anError.bucketError)
+                        }
+                    })
+        }
     }
 }

@@ -1,20 +1,19 @@
 package bucket.sdk.models
 
 // Bucket Packages:
+import android.os.Build
 import bucket.sdk.*
 import bucket.sdk.annotations.*
 import bucket.sdk.callbacks.*
 import bucket.sdk.extensions.*
 
-import android.os.Build
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.JSONObjectRequestListener
 import org.json.JSONObject
 import java.net.URL
-import java.util.*
 
-class Transaction(var amount: Int, var clientTransactionId: String) {
+class Transaction(var amount: Double, var totalTransactionAmount : Double, var clientTransactionId: String) {
 
     // This is the primary key for the transaction in our db, as annotated:
     @PrimaryKey
@@ -23,10 +22,8 @@ class Transaction(var amount: Int, var clientTransactionId: String) {
     var qrCodeContent                   : URL? = null
 
     // The rest of these fields are specified by the retailer:
-    var intervalId                      : String? = null
 
     var locationId                      : String? = null
-    var terminalId                      : String? = Build.SERIAL
 
     private fun updateWith(updateJSON: JSONObject?) {
 
@@ -35,28 +32,28 @@ class Transaction(var amount: Int, var clientTransactionId: String) {
         this.customerCode = updateJSON!!.getString("customerCode")
         this.bucketTransactionId = updateJSON.getString("bucketTransactionId")
         this.qrCodeContent = updateJSON.getURL("qrCodeContent")
-
+        this.totalTransactionAmount = updateJSON.getDouble("totalTransactionAmount")
     }
 
     private fun toJSON(): JSONObject {
 
         val obj = JSONObject()
 
-        // Set the intervalId to this date:
-        intervalId = Bucket.df.format(Date())
         // We will always set the amount & clientTransactionId when sending the JSON:
         obj.put("amount", amount)
         obj.put("clientTransactionId", clientTransactionId)
-        obj.put("terminalId", terminalId)
+        obj.put("totalTransactionAmount", totalTransactionAmount)
 
+        // The fields that may not be set:
         if (!locationId.isNil) { obj.put("locationId", locationId!!) }
         if (!customerCode.isNil) { obj.put("customerCode", customerCode!!) }
         if (!qrCodeContent.isNil) { obj.put("qrCodeContent", qrCodeContent!!) }
 
+
         return obj
     }
 
-    fun delete(callback: DeleteTransaction?) {
+    fun delete(customerCode: String, countryCode : String, callback: DeleteTransaction?) {
 
         // Get the client id & client secret for this retailer:
         val retailerCode = Credentials.retailerCode()
@@ -72,11 +69,14 @@ class Transaction(var amount: Int, var clientTransactionId: String) {
 
         val jsonBody = this.toJSON()
 
-        val url = Bucket.environment.transaction.build().toString()
+        val url = Bucket.environment.transaction.appendPath(customerCode).build().toString()
 
-        val build = AndroidNetworking.post(url)
+        val build = AndroidNetworking.delete(url)
                 .setContentType("application/json; charset=UTF-8")
                 .addHeaders("x-functions-key", terminalSecret!!)
+                .addHeaders("retailerId", retailerCode!!)
+                .addHeaders("countryId", countryCode)
+                .addHeaders("terminalId", Build.SERIAL)
                 .addJSONObjectBody(jsonBody)
                 .build()
 
@@ -91,7 +91,7 @@ class Transaction(var amount: Int, var clientTransactionId: String) {
         })
     }
 
-    fun create(callback: CreateTransaction?) {
+    fun create(countryCode : String, callback: CreateTransaction?) {
 
         // Get the client id & client secret for this retailer:
         val retailerCode = Credentials.retailerCode()
@@ -112,6 +112,9 @@ class Transaction(var amount: Int, var clientTransactionId: String) {
         val build = AndroidNetworking.post(url)
                 .setContentType("application/json; charset=UTF-8")
                 .addHeaders("x-functions-key", terminalSecret!!)
+                .addHeaders("retailerId", retailerCode)
+                .addHeaders("terminalId", Build.SERIAL)
+                .addHeaders("countryId", countryCode)
                 .addJSONObjectBody(jsonBody)
                 .build()
 
