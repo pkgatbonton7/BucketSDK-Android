@@ -6,6 +6,10 @@ import bucket.sdk.*
 import bucket.sdk.annotations.*
 import bucket.sdk.callbacks.*
 import bucket.sdk.extensions.*
+import com.github.kittinunf.fuel.android.extension.responseJson
+import com.github.kittinunf.fuel.httpDelete
+import com.github.kittinunf.fuel.httpPost
+import com.github.kittinunf.result.Result
 import org.json.JSONObject
 import java.net.URL
 
@@ -49,7 +53,7 @@ class Transaction(var amount: Double, var totalTransactionAmount : Double, var c
         return obj
     }
 
-    fun delete(customerCode: String, countryCode : String, callback: DeleteTransaction?) {
+    fun delete(countryCode : String, callback: DeleteTransaction?) {
 
         // Get the client id & client secret for this retailer:
         val retailerCode = Credentials.retailerCode()
@@ -63,9 +67,26 @@ class Transaction(var amount: Double, var totalTransactionAmount : Double, var c
 
         if (shouldIReturn) return
 
-        val jsonBody = this.toJSON()
+        val jsonBody = this.toJSON().toString()
 
         val url = Bucket.environment.transaction.appendPath(customerCode).build().toString()
+
+        url.httpDelete()
+                .body(jsonBody)
+                .header(Pair("x-functions-key", terminalSecret!!))
+                .header(Pair("retailerId", retailerCode!!))
+                .header(Pair("countryId", countryCode))
+                .header(Pair("terminalId", Build.SERIAL)).responseJson {
+                    request, response, result ->
+                    when (result) {
+                        is Result.Success -> {
+                            callback?.transactionDeleted()
+                        }
+                        is Result.Failure -> {
+                            callback?.didError(response.bucketError)
+                        }
+                    }
+                }
 
 //        val build = AndroidNetworking.delete(url)
 //                .setContentType("application/json; charset=UTF-8")
@@ -105,24 +126,24 @@ class Transaction(var amount: Double, var totalTransactionAmount : Double, var c
 
         val url = Bucket.environment.transaction.build().toString()
 
-//        val build = AndroidNetworking.post(url)
-//                .setContentType("application/json; charset=UTF-8")
-//                .addHeaders("x-functions-key", terminalSecret!!)
-//                .addHeaders("retailerId", retailerCode)
-//                .addHeaders("terminalId", Build.SERIAL)
-//                .addHeaders("countryId", countryCode)
-//                .addJSONObjectBody(jsonBody)
-//                .build()
-//
-//        build.getAsJSONObject(object : JSONObjectRequestListener {
-//            override fun onResponse(response: JSONObject?) {
-//                this@Transaction.updateWith(response)
-//                callback?.transactionCreated()
-//            }
-//            override fun onError(anError: ANError?) {
-//                callback?.didError(anError?.bucketError)
-//            }
-//        })
+        url.httpPost()
+                .body(jsonBody.toString())
+                .header(Pair("x-functions-key", terminalSecret!!))
+                .header(Pair("retailerId", retailerCode!!))
+                .header(Pair("countryId", countryCode))
+                .header(Pair("terminalId", Build.SERIAL)).responseJson {
+                    request, response, result ->
+                    when (result) {
+                        is Result.Success -> {
+                            this@Transaction.updateWith(result.value.obj())
+                            callback?.transactionCreated()
+                        }
+                        is Result.Failure -> {
+                            callback?.didError(response.bucketError)
+                        }
+                    }
+                }
+
     }
 
 }

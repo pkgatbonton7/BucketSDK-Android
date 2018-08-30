@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Build
 import bucket.sdk.callbacks.*
 import bucket.sdk.extensions.bucketError
-import bucket.sdk.models.Error
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
@@ -15,8 +14,6 @@ import java.util.*
 class Bucket {
 
     companion object {
-
-        @JvmStatic internal var tz : TimeZone = TimeZone.getTimeZone("UTC")
 
         @JvmStatic var appContext : Context? = null
 
@@ -75,29 +72,7 @@ class Bucket {
                         callback?.didError(error)
                     }
                 }
-
             }
-//            AndroidNetworking.get(theURL)
-//                    .addHeaders("countryId",countryCode)
-//                    .build().getAsJSONObject(object : JSONObjectRequestListener {
-//                        override fun onResponse(response: JSONObject?) {
-//                            // Deal with the data:
-//                            val denoms = response?.getJSONArray("denominations")
-//                            usesNaturalChangeFunction = response?.getBoolean("usesNaturalChangeFunction") ?: false
-//                            denoms?.let {
-//                                // Create our list of denominations:
-//                                val theDenoms : MutableList<Double> = ArrayList()
-//                                for (i in 0..(it.length()-1)) {
-//                                    theDenoms[i] = it.getDouble(i)
-//                                }
-//                                Bucket.denoms = theDenoms
-//                            }
-//                            callback?.setBillDenoms()
-//                        }
-//                        override fun onError(anError: ANError?) {
-//                            callback?.didError(anError.bucketError)
-//                        }
-//                    })
         }
 
         @JvmStatic fun registerTerminal(countryCode: String, callback: RegisterTerminal?) {
@@ -116,13 +91,8 @@ class Bucket {
 
                 when (result) {
                     is Result.Failure -> {
-                        val code = response.statusCode
-                        val responseString = String(response.data)
-                        val responseJSON = JSONObject(responseString)
-
-                        val error = Error(responseJSON.getString("message"), responseJSON.getString("errorCode"), code)
+                        val error = response.bucketError
                         callback?.didError(error)
-
                     }
                     is Result.Success -> {
                         val json = result.value.obj()
