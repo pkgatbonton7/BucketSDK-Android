@@ -5,7 +5,6 @@ import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
 import bucket.sdk.callbacks.RegisterTerminal
 import bucket.sdk.models.Error
-import com.androidnetworking.AndroidNetworking
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -31,7 +30,7 @@ class ExampleInstrumentedTest {
     fun testRegisteringDevice() {
 
         Bucket.appContext = InstrumentationRegistry.getTargetContext()
-        AndroidNetworking.initialize(Bucket.appContext)
+
         Credentials.setRetailerCode("BCKT-1")
         // Get the client id & client secret for this retailer:
         Bucket.registerTerminal("us", object : RegisterTerminal {
@@ -42,6 +41,8 @@ class ExampleInstrumentedTest {
                 assert(true)
             }
         })
+
+        Thread.sleep(5000)
 
     }
 

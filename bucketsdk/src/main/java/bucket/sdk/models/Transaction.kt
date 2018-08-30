@@ -6,10 +6,6 @@ import bucket.sdk.*
 import bucket.sdk.annotations.*
 import bucket.sdk.callbacks.*
 import bucket.sdk.extensions.*
-
-import com.androidnetworking.AndroidNetworking
-import com.androidnetworking.error.ANError
-import com.androidnetworking.interfaces.JSONObjectRequestListener
 import org.json.JSONObject
 import java.net.URL
 
@@ -35,7 +31,7 @@ class Transaction(var amount: Double, var totalTransactionAmount : Double, var c
         this.totalTransactionAmount = updateJSON.getDouble("totalTransactionAmount")
     }
 
-    internal fun toJSON(): JSONObject {
+    fun toJSON(): JSONObject {
 
         val obj = JSONObject()
 
@@ -71,24 +67,24 @@ class Transaction(var amount: Double, var totalTransactionAmount : Double, var c
 
         val url = Bucket.environment.transaction.appendPath(customerCode).build().toString()
 
-        val build = AndroidNetworking.delete(url)
-                .setContentType("application/json; charset=UTF-8")
-                .addHeaders("x-functions-key", terminalSecret!!)
-                .addHeaders("retailerId", retailerCode!!)
-                .addHeaders("countryId", countryCode)
-                .addHeaders("terminalId", Build.SERIAL)
-                .addJSONObjectBody(jsonBody)
-                .build()
-
-        build.getAsJSONObject(object : JSONObjectRequestListener {
-            override fun onResponse(response: JSONObject?) {
-                this@Transaction.updateWith(response)
-                callback?.transactionDeleted()
-            }
-            override fun onError(anError: ANError?) {
-                callback?.didError(anError?.bucketError)
-            }
-        })
+//        val build = AndroidNetworking.delete(url)
+//                .setContentType("application/json; charset=UTF-8")
+//                .addHeaders("x-functions-key", terminalSecret!!)
+//                .addHeaders("retailerId", retailerCode!!)
+//                .addHeaders("countryId", countryCode)
+//                .addHeaders("terminalId", Build.SERIAL)
+//                .addJSONObjectBody(jsonBody)
+//                .build()
+//
+//        build.getAsJSONObject(object : JSONObjectRequestListener {
+//            override fun onResponse(response: JSONObject?) {
+//                this@Transaction.updateWith(response)
+//                callback?.transactionDeleted()
+//            }
+//            override fun onError(anError: ANError?) {
+//                callback?.didError(anError?.bucketError)
+//            }
+//        })
     }
 
     fun create(countryCode : String, callback: CreateTransaction?) {
@@ -109,24 +105,24 @@ class Transaction(var amount: Double, var totalTransactionAmount : Double, var c
 
         val url = Bucket.environment.transaction.build().toString()
 
-        val build = AndroidNetworking.post(url)
-                .setContentType("application/json; charset=UTF-8")
-                .addHeaders("x-functions-key", terminalSecret!!)
-                .addHeaders("retailerId", retailerCode)
-                .addHeaders("terminalId", Build.SERIAL)
-                .addHeaders("countryId", countryCode)
-                .addJSONObjectBody(jsonBody)
-                .build()
-
-        build.getAsJSONObject(object : JSONObjectRequestListener {
-            override fun onResponse(response: JSONObject?) {
-                this@Transaction.updateWith(response)
-                callback?.transactionCreated()
-            }
-            override fun onError(anError: ANError?) {
-                callback?.didError(anError?.bucketError)
-            }
-        })
+//        val build = AndroidNetworking.post(url)
+//                .setContentType("application/json; charset=UTF-8")
+//                .addHeaders("x-functions-key", terminalSecret!!)
+//                .addHeaders("retailerId", retailerCode)
+//                .addHeaders("terminalId", Build.SERIAL)
+//                .addHeaders("countryId", countryCode)
+//                .addJSONObjectBody(jsonBody)
+//                .build()
+//
+//        build.getAsJSONObject(object : JSONObjectRequestListener {
+//            override fun onResponse(response: JSONObject?) {
+//                this@Transaction.updateWith(response)
+//                callback?.transactionCreated()
+//            }
+//            override fun onError(anError: ANError?) {
+//                callback?.didError(anError?.bucketError)
+//            }
+//        })
     }
 
 }
