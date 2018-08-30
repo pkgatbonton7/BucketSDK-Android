@@ -36,35 +36,7 @@ class ExampleInstrumentedTest {
         Bucket.appContext = InstrumentationRegistry.getTargetContext()
 
         // Get the client id & client secret for this retailer:
-        val retailerId = "6644211a-c02a-4413-b307-04a11b16e6a4"
-        val retailerSecret = "9IlwMxfQLaOvC4R64GdX/xabpvAA4QBpqb1t8lJ7PTGeR4daLI/bxw=="
 
-        val trans = Bucket.Transaction(0, "ll", 700)
-
-        val jsonBody = trans.toJSON()
-
-        val url = Bucket.environment.transaction(retailerId).build().toString()
-
-        val build = AndroidNetworking.post(url)
-                .setContentType("application/json; charset=UTF-8")
-                .addHeaders("x-functions-key", retailerSecret)
-                .addJSONObjectBody(jsonBody)
-                .build()
-
-        build.getAsJSONObject(object : JSONObjectRequestListener {
-            override fun onResponse(response: JSONObject?) {
-
-            }
-            override fun onError(anError: ANError?) {
-                assert(false)
-                if (anError.isNil) {
-                    println("NULL ERROR")
-                } else if (anError.bucketError.isNil) {
-                    println("BUCKET ERROR NULL")
-                }
-
-            }
-        })
 
 //        val jsonBody = JSONObject()
 //
