@@ -29,10 +29,10 @@ class Transaction(var amount: Double, var totalTransactionAmount : Double, var c
 
         if (updateJSON.isNil) return
 
-        this.customerCode = updateJSON!!.getString("customerCode")
-        this.bucketTransactionId = updateJSON.getString("bucketTransactionId")
+        this.customerCode = updateJSON!!.optString("customerCode", null)
+        this.bucketTransactionId = updateJSON.optString("bucketTransactionId", null)
         this.qrCodeContent = updateJSON.getURL("qrCodeContent")
-        this.totalTransactionAmount = updateJSON.getDouble("totalTransactionAmount")
+        this.totalTransactionAmount = updateJSON.optDouble("totalTransactionAmount", 0.0)
     }
 
     fun toJSON(): JSONObject {

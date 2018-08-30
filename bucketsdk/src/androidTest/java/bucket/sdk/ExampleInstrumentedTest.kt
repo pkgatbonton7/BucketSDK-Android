@@ -3,8 +3,10 @@ package bucket.sdk
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
+import bucket.sdk.callbacks.CreateTransaction
 import bucket.sdk.callbacks.RegisterTerminal
 import bucket.sdk.models.Error
+import bucket.sdk.models.Transaction
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -17,8 +19,7 @@ import org.junit.Assert.*
  */
 @RunWith(AndroidJUnit4::class)
 class ExampleInstrumentedTest {
-    @Test
-    fun useAppContext() {
+    @Test fun useAppContext() {
         // Context of the app under test.
 
         val appContext = InstrumentationRegistry.getTargetContext()
@@ -26,11 +27,9 @@ class ExampleInstrumentedTest {
         assertEquals("bucket.sdk", appContext.packageName)
     }
 
-    @Test
-    fun testRegisteringDevice() {
+    @Test fun testRegisteringDevice() {
 
         Bucket.appContext = InstrumentationRegistry.getTargetContext()
-
         Credentials.setRetailerCode("BCKT-1")
         // Get the client id & client secret for this retailer:
         Bucket.registerTerminal("us", object : RegisterTerminal {
@@ -38,12 +37,27 @@ class ExampleInstrumentedTest {
                 assert(true)
             }
             override fun didError(error: Error?) {
-                assert(true)
+                assertTrue(error?.message ?: "", false)
             }
         })
-
         Thread.sleep(5000)
+    }
 
+    @Test fun testCreateTransaction() {
+
+        Bucket.appContext = InstrumentationRegistry.getTargetContext()
+
+        val transaction = Transaction(0.54, 7.89, "RandomTransactionId")
+        transaction.create("us", object : CreateTransaction {
+            override fun transactionCreated() {
+                assert(true)
+            }
+
+            override fun didError(error: Error?) {
+                assertTrue(error?.message ?: "", false)
+            }
+        })
+        Thread.sleep(5000)
     }
 
 

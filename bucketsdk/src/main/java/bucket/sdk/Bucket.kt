@@ -99,9 +99,10 @@ class Bucket {
                         val apiKey = json.getString("apiKey")
                         val isApproved = json.getBoolean("isApproved")
 
-                        callback?.success(isApproved)
                         // Set the terminal secret:
                         Credentials.setTerminalSecret(apiKey)
+                        callback?.success(isApproved)
+
                     }
                 }
             }
