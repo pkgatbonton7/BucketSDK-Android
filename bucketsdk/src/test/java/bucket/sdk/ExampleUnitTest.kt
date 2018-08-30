@@ -17,27 +17,4 @@ class ExampleUnitTest {
     fun addition_isCorrect() {
         assertEquals(4, (2 + 2).toLong())
     }
-
-    @Test
-    fun testDictionaryTHing() {
-        var json = JSONObject()
-//        json["amount"] = 9.02
-
-        println(json["amount"])
-
-    }
-
-    @Test
-    fun createTransaction() {
-
-        val transaction = Transaction(0.54, 7.46,"ClientTransactionId")
-        transaction.create(object : CreateTransaction() {
-            override fun transactionCreated() {
-                assert(true)
-            }
-            override fun didError(error: Error?) {
-                assert(false)
-            }
-        })
-    }
 }
