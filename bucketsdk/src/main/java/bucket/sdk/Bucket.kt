@@ -91,6 +91,7 @@ class Bucket {
 
             val theURL = environment.registerTerminal.build().toString()
             AndroidNetworking.post(theURL)
+                    .setContentType("application/json; charset=UTF-8")
                     .addJSONObjectBody(json)
                     .addHeaders("countryId",countryCode)
                     .addHeaders("retailerId", retailerCode!!)
