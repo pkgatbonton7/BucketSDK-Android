@@ -88,24 +88,6 @@ class Transaction(var amount: Double, var totalTransactionAmount : Double, var c
                     }
                 }
 
-//        val build = AndroidNetworking.delete(url)
-//                .setContentType("application/json; charset=UTF-8")
-//                .addHeaders("x-functions-key", terminalSecret!!)
-//                .addHeaders("retailerId", retailerCode!!)
-//                .addHeaders("countryId", countryCode)
-//                .addHeaders("terminalId", Build.SERIAL)
-//                .addJSONObjectBody(jsonBody)
-//                .build()
-//
-//        build.getAsJSONObject(object : JSONObjectRequestListener {
-//            override fun onResponse(response: JSONObject?) {
-//                this@Transaction.updateWith(response)
-//                callback?.transactionDeleted()
-//            }
-//            override fun onError(anError: ANError?) {
-//                callback?.didError(anError?.bucketError)
-//            }
-//        })
     }
 
     fun create(countryCode : String, callback: CreateTransaction?) {
