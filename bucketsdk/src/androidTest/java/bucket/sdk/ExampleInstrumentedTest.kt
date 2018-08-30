@@ -38,8 +38,8 @@ class ExampleInstrumentedTest {
             override fun success(isApproved: Boolean) {
                 assert(true)
             }
-            override fun didError(error: Error?) {
-                assertTrue(error?.message ?: "", false)
+            override fun didError(error: Error) {
+                assertTrue(error.message, false)
             }
         })
         Thread.sleep(5000)
@@ -55,7 +55,7 @@ class ExampleInstrumentedTest {
                 assert(true)
             }
 
-            override fun didError(error: Error?) {
+            override fun didError(error: Error) {
                 assertTrue(error?.message ?: "", false)
             }
         })
@@ -73,7 +73,7 @@ class ExampleInstrumentedTest {
             override fun transactionDeleted() {
                 assert(true)
             }
-            override fun didError(error: Error?) {
+            override fun didError(error: Error) {
                 assertTrue(error?.message ?: "", false)
             }
         })
@@ -89,7 +89,7 @@ class ExampleInstrumentedTest {
             override fun setBillDenoms() {
                 assertTrue(true)
             }
-            override fun didError(error: Error?) {
+            override fun didError(error: Error) {
                 assertTrue(error?.message ?: "", false)
             }
         })

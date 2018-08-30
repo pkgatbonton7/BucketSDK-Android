@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import bucket.sdk.callbacks.*
 import bucket.sdk.extensions.bucketError
+import bucket.sdk.models.Error
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
@@ -77,6 +78,10 @@ class Bucket {
         @JvmStatic fun registerTerminal(countryCode: String, callback: RegisterTerminal?) {
 
             val retailerCode = Credentials.retailerCode()
+
+            if (retailerCode.isNullOrEmpty()) {
+                callback?.didError(bucket.sdk.models.Error("Please check your retailer id", "InvalidRetailer", 401))
+            }
 
             val terminalId = Build.SERIAL
 
