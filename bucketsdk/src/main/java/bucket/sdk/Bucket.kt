@@ -1,17 +1,17 @@
 package bucket.sdk
 
+import android.app.Application
 import android.content.Context
 import android.os.Build
 import bucket.sdk.callbacks.*
 import bucket.sdk.extensions.bucketError
-import bucket.sdk.models.Error
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
 import org.json.JSONObject
 import java.util.*
 
-class Bucket {
+class Bucket : Application() {
 
     companion object {
 

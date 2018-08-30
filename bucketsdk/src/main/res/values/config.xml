@@ -3,4 +3,6 @@
     <!-- API BASE URL's !-->
     <string name="prodEndpoint">prod.bucketthechange.com</string>
     <string name="devEndpoint">dev.bucketthechange.com</string>
+    <string name="stageEndpoint">staging.bucketthechange.com</string>
+
 </resources>
