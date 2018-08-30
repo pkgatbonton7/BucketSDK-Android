@@ -4,5 +4,5 @@ import bucket.sdk.models.Error
 
 interface BillDenomination {
     fun setBillDenoms()
-    fun didError(error: Error?)
+    fun didError(error: Error)
 }

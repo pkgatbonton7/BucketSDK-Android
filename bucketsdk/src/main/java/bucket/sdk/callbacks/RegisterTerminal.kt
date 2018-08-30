@@ -4,5 +4,5 @@ import bucket.sdk.models.Error
 
 interface RegisterTerminal {
     fun success(isApproved: Boolean)
-    fun didError(error: Error?)
+    fun didError(error: Error)
 }

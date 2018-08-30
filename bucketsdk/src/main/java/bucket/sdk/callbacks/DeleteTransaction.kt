@@ -4,5 +4,5 @@ import bucket.sdk.models.Error
 
 interface DeleteTransaction {
     fun transactionDeleted()
-    fun didError(error: Error?)
+    fun didError(error: Error)
 }
