@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.os.Build
 import bucket.sdk.callbacks.*
+import bucket.sdk.models.*
 import bucket.sdk.extensions.bucketError
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.httpPost
@@ -11,7 +12,7 @@ import com.github.kittinunf.result.Result
 import org.json.JSONObject
 import java.util.*
 
-class Bucket : Application() {
+class Bucket {
 
     companion object {
 
@@ -45,18 +46,28 @@ class Bucket : Application() {
             return bucketAmount
         }
 
-        @JvmStatic fun fetchBillDenominations(countryCode: String, callback: BillDenomination?) {
+        @JvmStatic fun fetchBillDenominations(callback: BillDenomination?) {
 
             val theURL = environment.billDenoms.build().toString()
 
-            theURL.httpPost().header(Pair("countryId", countryCode)).responseJson {
-                request, response, result ->
+            val countryCode = Credentials.countryCode()
+
+            var shouldReturn = false
+            if (countryCode.isNullOrEmpty()) {
+                shouldReturn = true
+                callback?.didError(Error.invalidCountryCode)
+            }
+
+            if (shouldReturn) return
+
+            theURL.httpPost().header(Pair("countryId", countryCode!!)).responseJson {
+                _, response, result ->
 
                 when (result) {
                     is Result.Success -> {
-                        val response = result.value.obj()
-                        val denominations = response.optJSONArray("denominations")
-                        usesNaturalChangeFunction = response.optBoolean("usesNaturalChangeFunction", false)
+                        val responseJson = result.value.obj()
+                        val denominations = responseJson.optJSONArray("denominations")
+                        usesNaturalChangeFunction = responseJson.optBoolean("usesNaturalChangeFunction", false)
                         denominations?.let {
                             // Create our list of denominations:
                             val theDenoms : MutableList<Double> = ArrayList()
@@ -75,12 +86,12 @@ class Bucket : Application() {
             }
         }
 
-        @JvmStatic fun registerTerminal(countryCode: String, callback: RegisterTerminal?) {
+        @JvmStatic fun registerTerminal(countryCode : String,callback: RegisterTerminal?) {
 
             val retailerCode = Credentials.retailerCode()
 
             if (retailerCode.isNullOrEmpty()) {
-                callback?.didError(bucket.sdk.models.Error("Please check your retailer id", "InvalidRetailer", 401))
+                callback?.didError(Error("Please check your retailer id", "InvalidRetailer", 401))
             }
 
             val terminalId = Build.SERIAL
@@ -91,7 +102,7 @@ class Bucket : Application() {
             val theURL = environment.registerTerminal.build().toString()
 
             theURL.httpPost().body(json.toString()).header(Pair("retailerId",retailerCode!!)).header(Pair("countryId", countryCode)).responseJson {
-                request, response, result ->
+                _, response, result ->
 
                 when (result) {
                     is Result.Failure -> {
@@ -99,11 +110,11 @@ class Bucket : Application() {
                         callback?.didError(error)
                     }
                     is Result.Success -> {
-                        val json = result.value.obj()
-                        val apiKey = json.getString("apiKey")
-                        val isApproved = json.getBoolean("isApproved")
-
+                        val responseJson = result.value.obj()
+                        val apiKey = responseJson.getString("apiKey")
+                        val isApproved = responseJson.getBoolean("isApproved")
                         // Set the terminal secret:
+                        Credentials.setCountryCode(countryCode)
                         Credentials.setTerminalSecret(apiKey)
                         callback?.success(isApproved)
 

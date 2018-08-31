@@ -50,13 +50,13 @@ class ExampleInstrumentedTest {
         Bucket.appContext = InstrumentationRegistry.getTargetContext()
 
         val transaction = Transaction(0.54, 7.89, "RandomTransactionId")
-        transaction.create("us", object : CreateTransaction {
+        transaction.create(object : CreateTransaction {
             override fun transactionCreated() {
                 assert(true)
             }
 
             override fun didError(error: Error) {
-                assertTrue(error?.message ?: "", false)
+                assertTrue(error.message ?: "", false)
             }
         })
         Thread.sleep(5000)
@@ -69,12 +69,12 @@ class ExampleInstrumentedTest {
         val transaction = Transaction(0.54, 7.89, "RandomTransactionId")
         transaction.customerCode = "us.eDZ9LBdvununS"
 
-        transaction.delete("us", object : DeleteTransaction {
+        transaction.delete(object : DeleteTransaction {
             override fun transactionDeleted() {
                 assert(true)
             }
             override fun didError(error: Error) {
-                assertTrue(error?.message ?: "", false)
+                assertTrue(error.message ?: "", false)
             }
         })
 
@@ -85,12 +85,12 @@ class ExampleInstrumentedTest {
 
         Bucket.appContext = InstrumentationRegistry.getTargetContext()
 
-        Bucket.fetchBillDenominations("us", object : BillDenomination {
+        Bucket.fetchBillDenominations(object : BillDenomination {
             override fun setBillDenoms() {
                 assertTrue(true)
             }
             override fun didError(error: Error) {
-                assertTrue(error?.message ?: "", false)
+                assertTrue(error.message ?: "", false)
             }
         })
 

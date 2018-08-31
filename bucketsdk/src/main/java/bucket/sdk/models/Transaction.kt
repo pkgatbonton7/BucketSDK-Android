@@ -53,16 +53,21 @@ class Transaction(var amount: Double, var totalTransactionAmount : Double, var c
         return obj
     }
 
-    fun delete(countryCode : String, callback: DeleteTransaction?) {
+    fun delete(callback: DeleteTransaction?) {
 
         // Get the client id & client secret for this retailer:
         val retailerCode = Credentials.retailerCode()
         val terminalSecret = Credentials.terminalSecret()
+        val countryCode = Credentials.countryCode()
 
         var shouldIReturn = false
         if (retailerCode.isNullOrEmpty() || terminalSecret.isNullOrEmpty()) {
             shouldIReturn = true
             callback?.didError(Error.unauthorized)
+        }
+        if (countryCode.isNullOrEmpty()) {
+            shouldIReturn = true
+            callback?.didError(Error.invalidCountryCode)
         }
 
         if (shouldIReturn) return
@@ -75,9 +80,9 @@ class Transaction(var amount: Double, var totalTransactionAmount : Double, var c
                 .body(jsonBody)
                 .header(Pair("x-functions-key", terminalSecret!!))
                 .header(Pair("retailerId", retailerCode!!))
-                .header(Pair("countryId", countryCode))
+                .header(Pair("countryId", countryCode!!))
                 .header(Pair("terminalId", Build.SERIAL)).responseJson {
-                    request, response, result ->
+                    _, response, result ->
                     when (result) {
                         is Result.Success -> {
                             callback?.transactionDeleted()
@@ -90,16 +95,21 @@ class Transaction(var amount: Double, var totalTransactionAmount : Double, var c
 
     }
 
-    fun create(countryCode : String, callback: CreateTransaction?) {
+    fun create(callback: CreateTransaction?) {
 
         // Get the client id & client secret for this retailer:
         val retailerCode = Credentials.retailerCode()
         val terminalSecret = Credentials.terminalSecret()
+        val countryCode = Credentials.countryCode()
 
         var shouldIReturn = false
         if (retailerCode.isNullOrEmpty() || terminalSecret.isNullOrEmpty()) {
             shouldIReturn = true
             callback?.didError(Error.unauthorized)
+        }
+        if (countryCode.isNullOrEmpty()) {
+            shouldIReturn = true
+            callback?.didError(Error.invalidCountryCode)
         }
 
         if (shouldIReturn) return
@@ -112,9 +122,9 @@ class Transaction(var amount: Double, var totalTransactionAmount : Double, var c
                 .body(jsonBody.toString())
                 .header(Pair("x-functions-key", terminalSecret!!))
                 .header(Pair("retailerId", retailerCode!!))
-                .header(Pair("countryId", countryCode))
+                .header(Pair("countryId", countryCode!!))
                 .header(Pair("terminalId", Build.SERIAL)).responseJson {
-                    request, response, result ->
+                    _, response, result ->
                     when (result) {
                         is Result.Success -> {
                             this@Transaction.updateWith(result.value.obj())

@@ -12,9 +12,9 @@ enum class DeploymentEnvironment {
         val builder = Uri.Builder()
         builder.scheme("https")
         when (this) {
-            Production -> builder.authority(Bucket.appContext?.getString(R.string.prodEndpoint))
-            Development -> builder.authority(Bucket.appContext?.getString(R.string.devEndpoint))
-            Staging -> builder.authority(Bucket.appContext?.getString(R.string.stageEndpoint))
+            Production -> builder.authority("prod.bucketthechange.com")
+            Development -> builder.authority("dev.bucketthechange.com")
+            Staging -> builder.authority("staging.bucketthechange.com")
         }
         builder.appendPath("api")
         builder.appendPath("v1")
