@@ -1,6 +1,5 @@
 package bucket.sdk
 
-import android.app.Application
 import android.content.Context
 import android.os.Build
 import bucket.sdk.callbacks.*

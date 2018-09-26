@@ -53,6 +53,48 @@ class Transaction(var amount: Double, var totalTransactionAmount : Double, var c
         return obj
     }
 
+    companion object {
+        @JvmStatic fun deleteBy(customerCode: String,callback: DeleteTransaction?) {
+
+            // Get the client id & client secret for this retailer:
+            val retailerCode = Credentials.retailerCode()
+            val terminalSecret = Credentials.terminalSecret()
+            val countryCode = Credentials.countryCode()
+
+            var shouldIReturn = false
+            if (retailerCode.isNullOrEmpty() || terminalSecret.isNullOrEmpty()) {
+                shouldIReturn = true
+                callback?.didError(Error.unauthorized)
+            }
+            if (countryCode.isNullOrEmpty()) {
+                shouldIReturn = true
+                callback?.didError(Error.invalidCountryCode)
+            }
+
+            if (shouldIReturn) return
+
+            val url = Bucket.environment.transaction.appendPath(customerCode).build().toString()
+
+            url.httpDelete()
+                    .header(Pair("x-functions-key", terminalSecret!!))
+                    .header(Pair("retailerId", retailerCode!!))
+                    .header(Pair("countryId", countryCode!!))
+                    .header(Pair("terminalId", Build.SERIAL)).responseJson {
+                        _, response, result ->
+                        when (result) {
+                            is Result.Success -> {
+                                callback?.transactionDeleted()
+                            }
+                            is Result.Failure -> {
+                                callback?.didError(response.bucketError)
+                            }
+                        }
+                    }
+
+        }
+    }
+
+
     fun delete(callback: DeleteTransaction?) {
 
         // Get the client id & client secret for this retailer:
@@ -72,12 +114,9 @@ class Transaction(var amount: Double, var totalTransactionAmount : Double, var c
 
         if (shouldIReturn) return
 
-        val jsonBody = this.toJSON().toString()
-
         val url = Bucket.environment.transaction.appendPath(customerCode).build().toString()
 
         url.httpDelete()
-                .body(jsonBody)
                 .header(Pair("x-functions-key", terminalSecret!!))
                 .header(Pair("retailerId", retailerCode!!))
                 .header(Pair("countryId", countryCode!!))
