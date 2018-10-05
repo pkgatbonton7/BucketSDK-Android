@@ -2,6 +2,7 @@ package bucket.sdk.models
 
 // Bucket Packages:
 import android.os.Build
+import android.util.Log
 import bucket.sdk.*
 import bucket.sdk.annotations.*
 import bucket.sdk.callbacks.*
@@ -163,7 +164,8 @@ class Transaction(var amount: Double, var totalTransactionAmount : Double, var c
                 .header(Pair("retailerId", retailerCode!!))
                 .header(Pair("countryId", countryCode!!))
                 .header(Pair("terminalId", Build.SERIAL)).responseJson {
-                    _, response, result ->
+                    request, response, result ->
+                    Log.d("bucket.sdk REQUEST: ", request.toString())
                     when (result) {
                         is Result.Success -> {
                             this@Transaction.updateWith(result.value.obj())
